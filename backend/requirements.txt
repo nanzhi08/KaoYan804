@@ -1,18 +1,10 @@
-aiofiles==24.1.0
-aiosqlite==0.22.1
-easyocr==1.7.2
-fastapi==0.111.0
-fastapi-cli==0.0.24
-Flask-SQLAlchemy==3.1.1
-httpx @ file:///C:/b/abs_43e135shby/croot/httpx_1723474830126/work
-numpy==1.26.4
-numpydoc @ file:///C:/b/abs_bbspp5l8vu/croot/numpydoc_1718279185573/work
-pdfplumber==0.11.0
-pillow==10.4.0
-pydantic==2.13.4
-pydantic-settings==2.14.1
-pydantic_core==2.46.4
-PyMuPDF==1.24.11
-python-multipart==0.0.29
-SQLAlchemy==2.0.30
-uvicorn==0.30.1
+aiofiles>=24.0
+aiosqlite>=0.22
+fastapi>=0.111.0
+httpx>=0.27
+openai>=1.0
+pydantic>=2.13
+pydantic-settings>=2.14
+python-multipart>=0.0.9
+SQLAlchemy>=2.0.30
+uvicorn>=0.30

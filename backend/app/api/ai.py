@@ -117,6 +117,7 @@ async def explain_knowledge_point(
             })
             conv = await ai_service.get_or_create_conversation(
                 db, None, provider, kp_id=kp_id,
+                first_user_message=prompt,
             )
             conv.messages = messages
             await db.commit()

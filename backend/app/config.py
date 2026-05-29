@@ -4,8 +4,17 @@ from pathlib import Path
 
 class Settings(BaseSettings):
     APP_NAME: str = "考研804知识库系统"
-    DATABASE_URL: str = f"sqlite+aiosqlite:///{Path(__file__).parent.parent.parent / 'data' / 'knowledge.db'}"
-    UPLOAD_DIR: str = str(Path(__file__).parent.parent.parent / "data" / "uploads")
+
+    # Default: relative to project root. Set DATA_DIR env var on Render.
+    DATA_DIR: str = str(Path(__file__).parent.parent.parent / "data")
+    DATABASE_URL: str = ""
+    UPLOAD_DIR: str = ""
+
+    def model_post_init(self, _context):
+        db_path = Path(self.DATA_DIR) / "knowledge.db"
+        self.DATABASE_URL = f"sqlite+aiosqlite:///{db_path}"
+        uploads = Path(self.DATA_DIR) / "uploads"
+        self.UPLOAD_DIR = str(uploads)
     CORS_ORIGINS: list[str] = [
         "http://localhost:5173",
         "http://localhost:3000",

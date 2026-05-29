@@ -57,3 +57,6 @@ data/uploads/*
 .claude/
 .playwright-cli/
 skills-lock.json
+
+# Allow bundled seed database
+!backend/seed/knowledge.db
