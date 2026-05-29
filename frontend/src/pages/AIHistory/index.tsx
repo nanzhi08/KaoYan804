@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import api from '../../services/api';
 import type { Message } from '../../types';
 
-const { Text, Paragraph } = Typography;
+const { Paragraph } = Typography;
 
 interface Conversation {
   id: number;
@@ -14,13 +14,6 @@ interface Conversation {
   message_count: number;
   created_at: string;
   updated_at: string;
-}
-
-interface ConversationDetail {
-  id: number;
-  messages: Message[];
-  knowledge_point_id?: number;
-  question_id?: number;
 }
 
 const AIHistory: React.FC = () => {
@@ -83,7 +76,7 @@ const AIHistory: React.FC = () => {
               ) : (
                 <List
                   dataSource={details[conv.id] || []}
-                  renderItem={(msg: Message, idx: number) => (
+                  renderItem={(msg: Message) => (
                     <List.Item style={{ border: 'none', padding: '12px 0' }}>
                       <div style={{ display: 'flex', gap: 10, width: '100%' }}>
                         <div style={{
