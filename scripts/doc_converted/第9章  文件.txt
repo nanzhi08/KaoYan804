@@ -1,0 +1,167 @@
+9.2  课后习题
+9.2.1 项目练习
+一．练习目的
+ 1．进一步理解文件的概念与应秀
+ 2．进一步巩固文件的读写操作
+ 3．进一步巩固文件的定位函数与一些检测函数的使用
+二．练习内容
+ 1． 从键盘输入一个字符串，将其中的大写字母全部转化成小写字母，然后输出到一个磁盘文本文件”test”中保存，输入的字符串以”!”结束。
+#include "stdio.h"
+void main()
+{
+	char str[100];
+	FILE *fp;
+	int i,len=0;
+	printf("输入一串英文字符:\n");	
+	while((str[len]=getchar())!='!')
+	  {	
+	  len++;	
+	  }
+	for(i=0;i<len;i++)
+	  if(str[i]>='a'&&str[i]<='z')
+	    str[i]+=32;
+	fp=fopen("test.txt","w");
+	fputs(str,fp);
+	fclose(fp);  
+    getch();  
+}
+　2． 有5个学生，每个学生有3门课的成绩，从键盘输入以上数据（包括学生号，姓名，三门课成绩），计算出平均成绩，将原有数据和计算出的平均分数存放在磁盘文件”student”中。
+　#include"stdio.h"
+　#include"stdlib.h"
+　#define M 5
+　#define stu struct student
+　stu
+　{
+　 int num;
+　 char name[20];
+　 float s1;
+　 float s2;
+　 float s3;
+　 float avg;
+　};
+　main()
+　{
+　 stu st[M],temp;
+　 FILE *fp,*fp1;
+　 int i,j;
+　 
+　 for(i=0;i<M;i++)
+　 {
+　  scanf("%d%s%f%f%f",&st[i].num,st[i].name,&st[i].s1,&st[i].s2,&st[i].s3);
+　  st[i].avg=(st[i].s1+st[i].s2+st[i].s3)/3;
+　  
+　 }
+　 if((fp=fopen("stud","wb"))==NULL)
+　 {
+　  printf("cannot open file\n");
+　  
+　 }
+　 for(i=0;i<M;i++)
+　 {
+　  if(fwrite(&st[i],sizeof(stu),1,fp)!=1)
+　   printf("file write error\n");
+　 }
+　 fclose(fp);
+　 fp=fopen("stud","rb");
+　 printf("num\tname\tscore1\tscore2\tscore3\taverage\n");
+　 for(i=0;i<M;i++)
+　 {
+　  fread(&st[i],sizeof(stu),1,fp);
+　  printf("%d\t%s\t%f\t%f\t%f\t%f\n",st[i].num,st[i].name,st[i].s1,st[i].s2,st[i].s3,st[i].avg);
+　  
+　 }
+　 printf("排序后的成绩\n");
+　 for(i=0;i<M;i++) 
+　  for(j=i+1;j<M;j++) 
+　   if(st[i].avg<st[j].avg) 
+　   { 
+　    temp=st[i]; 
+　    st[i]=st[j]; 
+　    st[j]=temp; 
+　
+　   } 
+　 fp1=fopen("stu_sort","w"); 
+　 for(i=0;i<M;i++)
+　 {
+　  fwrite(&st[i],sizeof(struct student),1,fp); 
+　  printf("%d\t%s\t%f\t%f\t%f\t%f\n",st[i].num,st[i].name,st[i].s1,st[i].s2,st[i].s3,st[i].avg);
+　  
+　 }
+　 fclose(fp1);
+　 getch();
+　}
+　
+9.2.2 练习题
+ 一．选择题：
+　1．系统的标准数入文件是指（      A       ）。
+　　（A)键盘       (B)显示器     (C)软盘    (D)硬盘
+　2．若执行fopen函数时发生错误，则函数的返回值是（      B       ）。
+　　(A)地址值      (B)0      (C)1      (D)EOF
+　3．若要用fopen函数打开一个新的二进制文件，该文件要既能读也能写，则文件
+　　方式字符串应是（      A       ）。
+　　(A)"ab+"   (B)"wb+"     (C)"rb+"   (D)"ab"
+　4.fscanf函数的正确调用形式是（      D       ）。
+　　  (A)fscanf(fp,格式字符串,输出表列)
+　　  (B)fscanf(格式字符串，输出表列,fp);
+　　  (C)fscanf(格式字符串,文件指针,输出表列);
+　　  (D)fscanf(文件指针，格式字符串,输入表列);
+　5.fgetc函数的作用是从指定文件读入一个字符，该文件的打开方式必须是（     C       ）。
+　　   (A)只写    (B)追加   (C)读或读写        (D)答案b和c都正确
+　6.函数调用语句：fseek(fp,-20L,2);的含义是（      C       ）。
+　　  (A)将文件位置指针移到距离文件头20个字节处
+　　  (B)将文件位置指针从当前位置向后移动20个字节
+　　  (C)将文件位置指针从文件末尾处后退20个字节
+　　  (D)将文件位置指针移到离当前位置20个字节处
+　7.利用fseek函数可实现的操作（     B        ）。
+　　  (A)fseek(文件类型指针，起始点，位移量);
+　　  (B)fseek(fp,位移量,起始点)；
+　　  (C)fseek(位移量，起始点,fp);
+　　  (D)fseek(起始点,位移量,文件类型指针);
+　8.在执行fopen函数时，ferror函数的初值是（      D       ）。
+　　   (A)TURE      (B)-1    (C)1    (D)0
+　9.下面程序向文件输出的结果是（      D       ）。
+　　	#include  "stdio.h"
+　　	main()
+　　	{	FILE  *fp=fopen(“TEST”,“wb”);
+　　		fprintf(fp, "%d%5.of%c%d",58,76273.0,’-’,2278);
+　　		fclose(fp);}
+　　(A)58 75273 – 22278		（B）5876273.000000 – 2278
+　　　　（C）5876273 – 2278		   （D）因为文件为二进制文件而不可读
+二．填空题
+　1.程序运行时输入Win Tc，输出的结果是    Win Tc  
+　　	#include <stdio.h> 
+　　	main()
+　　	{	FILE  *fp;
+　　		char  ch;
+　　		if((fp=fopen(“file.dat”,“w”))==NULL)
+　　		{	printf(“Cannot  open  file\n”);
+　　			exit(0);}
+　　ch=getchar();
+　　while(ch!= ’#’)
+　　{	fputc(ch,fp);
+　　putchar(ch);
+　　ch=getchar();}
+　　fclose(fp);} 
+　2.将有10个字符型数组中的数据读入到文件并，然后再从文件中读出写到数组b中，请填空。
+#include "stdio.h"
+int main()
+{
+	char a[10],b[10],i;
+	FILE *Fp;
+	Fp=fopen("f1.txt","w");
+	for(i=0;i<10;i++)
+	{
+		scanf("%c",a+i);
+		fprintf(Fp,"%c\t",a[i]);   
+	}
+	fclose(Fp);
+	Fp=fopen("f1.txt","r");
+	for(i=0;i<10;i++)
+	{
+		fscanf(Fp,"%c\t",b+i);     
+
+	}
+		printf("%s",b);
+	fclose(Fp);
+	getch();
+}

@@ -1,0 +1,95 @@
+8.3  课后习题
+8.3.1 项目练习
+一．练习目的
+　1.进一步巩固C语言位运算符和位运算的基本知识
+　2.进一步掌握左移运算和右移运算的基本使用方法。
+二．练习内容
+1.  编写一个函数getbits，从一个16位的单元中取出某几位（即该几位保留原值，其余位为0）。函数调用形式为：getbits(value,n1,n2)，其中value为该16位（二个字节）中的数据值，n1为欲取出的起始位，n2为欲取出的结束位。如：getbits(0101675,5,8)表示对八进制数0101675取出它的从左面开始的第5位到第8位。
+#include "stdio.h"
+int getbits(int value, int n1, int n2) 
+ { 
+ int mask=1; 
+ int i;
+ int t; 
+ if(n2<n1) 
+ { 
+ t=n2; 
+ n2=n1; 
+ n1=t; 
+ } 
+ int len = n2-n1; 
+ for(i=0;i<len;i++) 
+ { 
+ mask<<= 1;
+ mask|= 1; 
+ } 
+ mask<<=16-n2;
+ value&=mask; 
+ value>>=16-n2;
+ return value; 
+ } 
+main()
+{
+     int a;
+    int n1,n2;
+    printf("input an octal number:");
+    scanf("%o",&a);
+    printf("input n1,n2:");
+    scanf("%d,%d",&n1,&n2);
+    printf("result:%o\n",getbits(a,n1,n2));
+getch();
+}
+2.  编写一个函数getbits(value)，从一个16位的二进制数中取出它的奇数位（即从左边起的第1、3、5、．．．、15位）。参数value为该16位（二个字节）中的数据值。
+#include "stdio.h"
+void main()
+{
+    unsigned short getbits(unsigned short value);
+    unsigned short int a;
+    printf("请输入一个八进制数:");
+    scanf("%o",&a);
+    printf("结果:%o\n",getbits(a));
+    getch();
+}
+ 
+unsigned short getbits(unsigned short value)
+{
+    int i,j;
+    unsigned short int z,a,q;
+    z=0;
+    for(i=1;i<=15;i+=2)
+    {
+        q=1;
+        for(j=1;j<=(16-i-1)/2;j++) 
+            q=q*2;
+        a=value>>(16-i);
+        a=a<<15; 
+        a=a>15;
+        z=z+a*q;
+    }
+    return(z);
+}
+8.3.2 练习题
+一．选择题
+1．若整型变量a、b的值分别为13、22，则a&b=（    A      ）。            
+  （A）4		（B）0		   （C）22	  	     （D）13
+2. 若整型变量a的值为-3，则a<<2=（    C      ）。            
+  (A)0       （B）12        （C）-12         （D）-24
+3. 若整型变量a的值为96，则a>>3=（    B      ）。            
+  （A）11      （B）12        （C）-11         （D）9
+4. 以下叙述中不正确的是（    C      ）。            
+  （A）表达式a&=b等价于a=a&b
+  （B）表达式a|=b等价于a=a|b
+  （C）表达式a!=b等价于a=a!b
+  d)表达式a^=b等价于a=a^b
+5. 若x=2,y=3,则x&y的结果是（     B     ）。            
+ （A）0 	   （B）2		  （C）3		   （D）5
+6. 在位运算中，操作数每左移一位，则结果相当于（    A      ）。            
+   （A）操作数乘以2       （B）操作数除以2
+  （C）操作数除以4       （D）操作数乘以4
+7. 已知小写字母a的ASCII码为97，大写字母A 的ASCII码为65。以下程序的输出结果为（    C      ）。            
+	main(){	unsigned  int  a=32,b=66;  printf(“%c\n”,a|b);  }
+   （A）66      （B）98      （C）b        （D）B	
+二．填空题
+1. 若有以下语句，则c的二进制数是（    10      ）。            
+	char  a=3,b=6,c;  c=a^b>>2;
+2. 设a=00101101，若想通过a^b运算使a的高4位取反，低4位不变，则b的二进制数应该是（ 00001101         ）。            

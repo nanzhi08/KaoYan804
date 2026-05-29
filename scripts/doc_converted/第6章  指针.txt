@@ -1,0 +1,231 @@
+6.6 课后习题
+6.6.1 项目练习
+一．练习目的
+ 1．进一步巩固指针变量的定义与引用方法
+ 2．进一步巩固一维数组与指针关系
+ 3．进一步巩固二维数组与指针的关系
+ 4．进一步巩固指针与函数的关系
+ 5．进一步巩固指针与字符串的关系
+二．练习内容
+1．定义一个偶数个元素的一维数组，求这个数组第0、第n-1个元素，第1个、第n-2个元素，依次递推，求出它们两两的和值。
+#include "stdio.h"
+main()
+{int n,a[100],i,sum;
+printf("请输入一个小于100的偶数");
+scanf("%d",&n);
+for(i=0;i<=n-1;i++)
+scanf("%d",a+i);
+printf("首尾依次向内递推两两和值为："); 
+for(i=0;i<n/2;i++)
+{sum=a[i]+a[n-1-i];
+ printf("%d\n",sum);}
+    getch();
+}
+
+2．有12个数围成一圈，求出相邻三个数之和的最小值。
+int min(int *a,int n,int *minsum)
+{
+    int num,i,sum;   
+    *minsum=*a+*(a+1)+*(a+2); 
+    for(i=1; i<n; i++) 
+    {
+        sum=*(a+i)+*(a+(i+1)%n)+*(a+(i+2)%n);
+        if(sum<*minsum)
+        {
+            num=i;
+            *minsum=sum; 
+        }
+    }
+    return num;
+}
+main()
+{
+    int a[]={2,1,10,9,8,7,6,5,4,3,12,3};
+    int n=12;
+    int *minsum=&n;
+    int num;
+        num=min(a,n,minsum);
+
+    printf("最小值是: %d\n", *minsum);
+    printf("起始数组元素序号是: %d\n", num);
+    getch();
+}
+3．定义一个n*n的二维数组，将各元素行列互换后以实现数组的转置。
+#include "stdio.h"
+int main()
+{   int n;
+    scanf("%d",&n);
+	int a[n][n],i,j,b[n][n];
+	printf("请按行输入各元素的值：");
+	for(i=0;i<n;i++)	
+		for(j=0;j<n;j++)
+			scanf("%d",&a[i][j]);
+	for(i=0;i<n;i++)
+		for(j=0;j<n;j++)
+			b[j][i]=a[i][j];
+  	printf("转置后的矩阵为：");
+	for(i=0;i<n;i++)
+	{
+		for(j=0;j<n-1;j++)
+			printf("%d ",b[i][j]);
+		printf("%d\n",b[i][n-1]);
+	}
+getch();
+}
+
+ 4．编写程序，将一个字符串反向存放。
+#include "stdio.h"
+#include "string.h"
+main()
+{
+ char a[100],temp;
+ int i,len;
+ gets(a);
+ len=strlen(a);
+ for(i=0;i<=len/2;i++)
+ {
+    temp=a[i];
+    a[i]=a[len-1-i];
+    a[len-1-i]=temp;
+ }
+  puts(a);
+  getch(); 
+}
+　5．输入一串字符串，统计其中字母非字母的数目。
+　#include "stdio.h"
+　#include "string.h"
+　main()
+　{
+　 char a[100],temp;
+　 int num1=0,num2=0,i,len;
+　 gets(a);
+　 len=strlen(a);
+　 for(i=0;i<len;i++)
+　 {
+　   if(isalpha(a[i])) num1++;
+　   else
+　     num2++;
+　      }
+　      printf("字符串\""); 
+　   printf("%s\"中字母的个数是%d个，非字母的个数是%d个",a,num1,num2); 
+　  getch(); 
+　}
+6.6.2 练习题
+一．选择题
+1．变量的指针，其含义是指该变量的（     B       ）。
+  （A）值  （B）地址  （C）名  （D）一个标志?
+2．若有语句int *point,a=6;和point=&a;下面均代表地址的一组选项是（      D      ）。
+  （A）point,*&a             （B）&*a,&a,*point
+  （C）*&point,*point,&a      （D）&a,&*point ,point?
+3.下列不正确的定义是（     A       ）。
+（A）int *p=&i,i; （B）int *p,i;
+（C）int i,*p=&i; （D）int i,*p;
+4．若有说明;int *p,m=5,n;以下正确的程序段的是（     D       ）。
+ （A）p=&n;               （B）p=&n;
+      scanf("%d",&p);           scanf("%d",*p);
+ （C）scanf("%d",&n);      （D）p=&n;
+      *p=n;                  *p=m;
+5．以下程序执行后，a的值是（     C       ）。
+main()
+{ int a,k=4,m=6,*p1=&k,*p2=&m;
+a=p1==&m;  printf("%d\n",a);  getch(); }
+（A）4   （B）1   （C）0   （D）运行时出错，无定值
+6.设指针x指向的整型变量值为25，则“printf(“%d\n”,++*x);”的输出是（    D    ）。
+（A）23 （B）24 （C）25 （D）26 
+7．下列不正确的定义是（   A   ）。
+（A）int *p=&i,i;   （B）int *p,i; （C）int i,*p=&i;   （D）int i,*p;  
+8．若有以下定义，则对a数组元素的正确引用是（    D    ）。
+　　　 int a[5],*p=a;
+（A）*&a[5]   （B）a+2  （C）*(p+5)  （D）*(a+2)
+9．若有以下定义，则p+5表示（   A    ）.
+        int  a[10],*p=a;
+  （A）元素a[5]的地址            （B）元素a[5]的值
+  （C）元素a[6]的地址             （D）元素a[6]的值
+10.  若已定义：int a[9]，*p=a；并在以后的语句中未改变p的值，不能表示a[1] 地址的表达式是（    C    ）。
+（A） p+1      （B） a+1     （C）a++     （D） ++p
+11．设有以下程序段：
+int arr[]={6,7,8,9,10},*ptr; 
+ptr=arr;    *(ptr+2)+=2; 
+printf("%d,%d\n",*ptr,*(ptr+2));
+getch();
+则程序段的输出结果为（    D    ）。
+（A）8,10          （B）6,8         （C）7,9          （D）6,10
+12.设有如下定义：?
+int (*ptr)*();?
+则以下叙述中正确的是（    D    ）
+（A)ptr是指向一维组数的指针变量
+（B)ptr是指向int型数据的指针变量
+（C)ptr是指向函数的指针,该函数返回一个int型数据
+（D)ptr是一个函数名,该函数的返回值是指向int型数据的指针
+13．设有说明int(*ptr)[M];其中的标识符ptr是（    C    ）。        
+（A）M个指向整型变量的指针
+（B）指向M个整型变量的函数指针
+（C）一个指向具有M个整型元素的一维数组的指针 
+（D）具有M个指针元素的一维指针数组，每个元素都只能指向整型量
+14.若有定义“int a[3][4];”则对数组元素a[i][j](0<=i<3,0<=j<4) 正确的引用是（    B   ）。 
+（A）*(a+4*i+j) （B）*(*(a+i)+j)（C）*(a+i)[j]  （D）a[i]+j
+15. 执行以下程序段后，m的值为（    A    ）。
+?   int a[2][3]={{1,2,3},{4,5,6}},m,*p;
+　　　p=&a[0][0];
+　　　m=(*p)*(*(p+2))*(*(p+4));?
+（A)15         （B)14         （C)13          （D)12?
+16．下面程序段的运行结果是（    C    ）。
+  char  *s="abcde";     s+=2;printf("%d",s);
+  （A）cde     （B）字符'c'     （C）字符'c'的地址     （D）无确定的输出结果
+17.	指针s所指字符串的长度为（    D    ）。 
+char *s="\\"Name\\Address\n";
+（A) 19   			（B) 15    		（C) 18     	（D)	说明不合法
+18．设p1和p2是指向同一个字符串的指针变量，c为字符变量，则以下不能正确执行的赋值语句是（    B    ）。
+（A）c=*p1+*p2;    （B）p2=c   (C)p1=p2      （D）c=*p1*(*p2);
+?19．下面程序的运行结果是（    B    ）。
+  #include  "stdio.h"
+  #include  "string.h"
+  main()
+  { char *s1="AbDeG";    char *s2="AbdEg";
+    s1+=2;   s2+=2;
+   printf("%d\n",strcmp(s1,s2)); getch();   }
+  （A）正数    （B）负数   （C）零   （D）不确定的值
+二．填空题
+1．若有定义:int a[]={2,4,6,8,10,12},*p=a;则*(p+1)的值是（    4    ）。 *(a+5)的值是（    10    ）。
+2．若有以下定义:int a[2][3]={2,4,6,8,10,12};则a[1][0]的值是（    8    ）。 *(*(a+1)+0)的值是（    8    ）。?
+3. 以下程序的功能是：通过指针操作，找出三个整数中的最小值并输出。
+  #include "stdlib.h"
+  main()
+  {int *a,*b,*c,num,x,y,z;
+   a=&x;b=&y;c=&z;
+   printf("输入3个整数：");
+   scanf("%d%d%d",a,b,c);
+   printf("%d,%d,%d\n",*a,*b,*c);
+   num=*a;
+   if(*a>*b)   （    num=*b;   ）
+   if(num>*c)  （    num=*c;   ）
+   printf("输出最小整数:%d\n",num);  getch();  }??
+4．以下程序将数组a中的数据按逆序存放。
+  #define M 8
+  main()
+  {int a[M],i,j,t;
+   for(i=0;i<M;i++)scanf("%d",a+i);
+      i=0;j=M-1;
+   while(i<j)
+    { t=*(a+i);  *(a+i)=a[j]  ;  *(   a+i   )=t;
+     i++;j--;  }
+  for(i=0;i<M;i++)printf("%3d",*(a+i));  getch();   }
+5．以下函数rotate的功能是：将a所指N行N列的二维数组中的最后一行放到b所指二维数组的第0列中，把a所指二维数组中的第0行放到b所指二维数组的最后一列中，b所指二维数组中其他数据不变。???? 
+ ?#?define?N?4 
+?void?rotate(int??a[][N],int??b[][N]) 
+?{?int??i,?j; 
+???for?(i=0;?i<N;?i++) 
+???{??b[i][N-1]=   a[0][i]  ;   b[i][0]   =a[N-1][i];??} ?}
+6．下面程序段的运行结果是（   ef    ）。
+  char str[]="abc\0def\0ghi",*p=str;
+  printf("%s",p+5);?
+?7．下面程序的运行结果是
+（  Coble
+　　dBase
+　　C language
+　　Pascal      ）。
+  main()
+  {char *a[]={"Pascal","C language","dBase","Coble"},(**p)[];
+   int j;
+   p=a+3;
+   for(j=3;j>=0;j--)printf("%s\n",*(p--)); getch();  }

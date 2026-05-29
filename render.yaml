@@ -1,0 +1,21 @@
+# Render.com 部署配置
+# 在 Render Dashboard 创建 Web Service 时使用此配置，或手动按照以下参数创建
+
+services:
+  - type: web
+    name: kaoyan-804
+    runtime: python
+    plan: free
+    buildCommand: |
+      pip install -r backend/requirements.txt
+      cd frontend && npm ci && npm run build
+    startCommand: cd backend && python run_prod.py
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: ENABLE_CORS
+        value: "false"
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1

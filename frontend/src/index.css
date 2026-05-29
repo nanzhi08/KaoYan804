@@ -1,0 +1,185 @@
+@import url('https://fonts.googleapis.com/css2?family=LXGW+WenKai&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  color: #2C2C2C;
+  background: #FAF7F2;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ---- 侧边栏 ---- */
+.ant-layout-sider {
+  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ---- 卡片 ---- */
+.ant-card {
+  border-radius: 12px !important;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+  border: 1px solid #F0ECE5;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.ant-card:hover {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* ---- 统计组件 ---- */
+.ant-statistic-title {
+  color: #6B6560 !important;
+  font-size: 13px !important;
+}
+.ant-statistic-content {
+  font-family: 'LXGW WenKai', 'KaiTi', serif !important;
+}
+
+/* ---- 按钮 ---- */
+.ant-btn-primary {
+  box-shadow: 0 2px 8px rgba(74, 91, 201, 0.25);
+}
+.ant-btn-primary:hover {
+  box-shadow: 0 4px 14px rgba(74, 91, 201, 0.35);
+}
+
+/* ---- 标签 ---- */
+.ant-tag {
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+/* ---- 进度条 ---- */
+.ant-progress-bg {
+  border-radius: 100px !important;
+}
+
+/* ---- 表格 ---- */
+.ant-table {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* ---- 弹窗 ---- */
+.ant-modal-content {
+  border-radius: 14px !important;
+}
+
+/* ---- 输入框 ---- */
+.ant-input, .ant-select-selector, .ant-picker {
+  border-radius: 8px !important;
+}
+
+/* ---- Tabs 标签页 ---- */
+.ant-tabs-tab {
+  font-size: 14px !important;
+  padding: 10px 0 !important;
+}
+.ant-tabs-tab-active .ant-tabs-tab-btn {
+  font-weight: 500;
+}
+
+/* ---- 自定义滚动条 ---- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D0CCC5;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B0ACA5;
+}
+
+/* === Mobile / iOS PWA === */
+
+/* iOS safe-area for bottom navigation and notch */
+body {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* Mobile touch optimization */
+@media (max-width: 768px) {
+  body {
+    font-size: 15px;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Allow text selection in inputs and code blocks */
+  input, textarea, .code-block, pre, code {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* Bigger touch targets */
+  .ant-btn {
+    min-height: 40px;
+  }
+
+  .ant-radio-wrapper,
+  .ant-checkbox-wrapper {
+    min-height: 44px;
+    align-items: center;
+  }
+
+  /* Reduce card padding */
+  .ant-card-body {
+    padding: 12px !important;
+  }
+
+  /* Full-width modals */
+  .ant-modal {
+    max-width: calc(100vw - 16px) !important;
+    margin: 8px;
+  }
+
+  /* Tabs - scrollable on mobile */
+  .ant-tabs-tab {
+    font-size: 13px !important;
+    padding: 8px 4px !important;
+  }
+
+  /* Smaller headings */
+  .ant-statistic-content {
+    font-size: 20px !important;
+  }
+  .ant-statistic-title {
+    font-size: 11px !important;
+  }
+
+  /* Prevent iOS zoom on input focus */
+  input[type="text"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  /* Drawer close button spacing */
+  .ant-drawer-close {
+    margin-right: 4px;
+  }
+}
+
+/* iOS PWA standalone mode */
+@media (display-mode: standalone) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

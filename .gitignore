@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Build output
+frontend/dist/
+
+# Database
+*.db
+*.db-journal
+*.db-wal
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Uploads & user data
+data/uploads/*
+
+# Logs
+*.log
+
+# Playwright
+screenshots/
+.claude/
+
+# Large data - use seed scripts instead
+二工大804资料包/
+scripts/ocr_output/
+scripts/ocr_output/
+data/uploads/.gitkeep
+
+# Data directory - exclude DB but keep structure
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/uploads/*
+!data/uploads/.gitkeep
+
+# Claude/agents
+.agents/
+.claude/
+.playwright-cli/
+skills-lock.json

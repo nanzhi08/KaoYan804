@@ -1,0 +1,165 @@
+id   type             part           difficulty  content                                                                          answer                                  
+---  ---------------  -------------  ----------  -------------------------------------------------------------------------------  ----------------------------------------
+1    single_choice    C_programming  2           以下哪个是C语言中合法的标识符？                                                                 B                                       
+
+2    single_choice    C_programming  2           设有 int a=5, b=3; 则表达式 a/b 的值是？                                                   C                                       
+
+3    single_choice    C_programming  2           以下代码的输出是什么？                                                                      B                                       
+                                                 ```c                                                                                                                     
+                                                 int i = 0;                                                                                                               
+                                                 while(i < 3) {                                                                                                           
+                                                     printf("%d ", i);                                                                                                    
+                                                     i++;                                                                                                                 
+                                                 }                                                                                                                        
+                                                 ```                                                                                                                      
+
+4    program_reading  C_programming  3           阅读以下程序，写出输出结果：                                                                   A                                       
+                                                 ```c                                                                                                                     
+                                                 #include <stdio.h>                                                                                                       
+                                                 int main() {                                                                                                             
+                                                     int a = 10, b = 5;                                                                                                   
+                                                     i                                                                                                                    
+
+5    single_choice    C_programming  2           设有 int a[5] = {1, 2, 3, 4, 5}; 则 a[2] 的值是？                                       C                                       
+
+6    fill_blank       C_programming  3           使用冒泡排序对数组 int a[5] = {5, 3, 1, 4, 2} 从小到大排序，第一趟排序后数组变为 ____。                     {3, 1, 4, 2, 5}                         
+
+7    single_choice    C_programming  3           以下关于函数的说法，正确的是？                                                                  A                                       
+
+8    program_reading  C_programming  4           以下递归函数的输出是什么？                                                                    24                                      
+                                                 ```c                                                                                                                     
+                                                 int f(int n) {                                                                                                           
+                                                     if (n <= 1) return 1;                                                                                                
+                                                     return n * f(n -                                                                                                     
+
+9    single_choice    C_programming  4           设有 int a = 10, *p = &a; 则 *p + 1 的值是？                                            A                                       
+
+10   single_choice    C_programming  3           C语言中，字符串 "hello" 在内存中占用的字节数是？                                                    B                                       
+
+11   fill_blank       C_programming  3           C语言中，用于打开文件的函数是 ____。                                                            fopen                                   
+
+28   single_choice    C_programming  1           C语言源程序文件经过编译后生成的文件扩展名是？                                                          B                                       
+
+29   single_choice    C_programming  2           以下哪项不是C语言的基本数据类型？                                                                C                                       
+
+30   fill_blank       C_programming  1           C语言中，整数类型 int 在32位系统中通常占用 ____ 个字节。                                              4                                       
+
+31   fill_blank       C_programming  2           在C语言中，用关键字 ____ 定义符号常量。                                                          #define                                 
+
+32   short_answer     C_programming  2           简述C语言中变量声明与定义的区别。                                                                声明(declaration)仅告知编译器变量的类型和名称，不分配内存；定义(d
+
+33   single_choice    C_programming  2           设有 int a = 3, b = 4; 则表达式 (a++) + (++b) 的值是？                                     B                                       
+
+34   single_choice    C_programming  3           表达式 5 > 3 && 2 || 8 < 4 - !0 的值是？                                                B                                       
+
+35   fill_blank       C_programming  2           C语言中，表达式 10 % 3 的值是 ____，表达式 -10 % 3 的值是 ____。                                   1 和 -1                                  
+
+36   single_choice    C_programming  3           设有 int x = 5; 则执行 x += x -= x * x; 后，x的值为？                                       B                                       
+
+37   single_choice    C_programming  2           以下代码段执行后，s的值是？                                                                   B                                       
+                                                 ```c                                                                                                                     
+                                                 int i, s = 0;                                                                                                            
+                                                 for (i = 1; i <= 10; i++) {                                                                                              
+                                                     if (i % 2 == 0                                                                                                       
+
+38   single_choice    C_programming  2           以下代码输出什么？                                                                        B                                       
+                                                 ```c                                                                                                                     
+                                                 int x = 3;                                                                                                               
+                                                 switch (x) {                                                                                                             
+                                                     case 1: printf("A");                                                                                                 
+                                                     case 2: prin                                                                                                         
+
+39   program_reading  C_programming  3           阅读以下程序，写出输出结果：                                                                   *                                       
+                                                 ```c                                                                             **                                      
+                                                 #include <stdio.h>                                                               ***                                     
+                                                 int main() {                                                                                                             
+                                                     int i, j;                                                                                                            
+                                                     for (i = 1                                                                                                           
+
+40   program_reading  C_programming  3           阅读以下程序，写出输出结果：                                                                   5, -4                                   
+                                                 ```c                                                                                                                     
+                                                 #include <stdio.h>                                                                                                       
+                                                 int main() {                                                                                                             
+                                                     int a = 1, b = 10;                                                                                                   
+                                                     d                                                                                                                    
+
+41   fill_blank       C_programming  2           C语言的循环结构中，____ 语句用于结束本次循环，进入下一次循环；____ 语句用于直接跳出当前循环。                             continue 和 break                        
+
+42   single_choice    C_programming  2           设有 int a[][3] = {{1, 2}, {3, 4, 5}, {6}}; 则 a[1][2] 的值是？                         B                                       
+
+43   fill_blank       C_programming  3           用选择排序对数组 int a[6] = {64, 25, 12, 22, 11, 9} 从小到大排序，第一趟（选出最小值放到第一个位置）后数组变为 ____。  {9, 25, 12, 22, 11, 64}                 
+
+44   single_choice    C_programming  2           以下关于结构体的说法，正确的是？                                                                 A                                       
+
+45   single_choice    C_programming  3           有以下定义：                                                                           B                                       
+                                                 ```c                                                                                                                     
+                                                 struct student {                                                                                                         
+                                                     char name[20];                                                                                                       
+                                                     int score;                                                                                                           
+                                                 } s[3] = {{"Alice                                                                                                        
+
+46   programming      C_programming  3           编写C语言程序：将一个3×3的二维数组进行转置（行列互换），并在转置后输出。要求使用二重循环实现。                                #include <stdio.h>                      
+                                                                                                                                  int main() {                            
+                                                                                                                                      int                                 
+
+47   single_choice    C_programming  2           C语言中，函数返回值的类型由什么决定？                                                              C                                       
+
+48   single_choice    C_programming  2           以下关于递归的说法，错误的是？                                                                  D                                       
+
+49   program_reading  C_programming  3           阅读以下程序，写出输出结果：                                                                   3 5                                     
+                                                 ```c                                                                                                                     
+                                                 #include <stdio.h>                                                                                                       
+                                                 void swap(int a, int b) {                                                                                                
+                                                     int t = a;                                                                                                           
+
+50   program_reading  C_programming  3           以下递归函数的返回值是什么？                                                                   5                                       
+                                                 ```c                                                                                                                     
+                                                 int fib(int n) {                                                                                                         
+                                                     if (n <= 1) return n;                                                                                                
+                                                     return fib(n                                                                                                         
+
+51   programming      C_programming  3           编写C语言函数，用迭代方法求斐波那契数列的第n项：F(0)=0, F(1)=1, F(n)=F(n-1)+F(n-2)。要求写出完整函数定义。          int fib(int n) {                        
+                                                                                                                                      if (n <= 1) return                  
+
+52   single_choice    C_programming  2           设有 int a[] = {1, 2, 3, 4, 5}, *p = a; 则 *(p + 2) 的值是？                            C                                       
+
+53   single_choice    C_programming  3           设 char str[] = "Hello"; 则 sizeof(str) 和 strlen(str) 的值分别是？                       B                                       
+
+54   single_choice    C_programming  4           设有以下定义：                                                                          C                                       
+                                                 ```c                                                                                                                     
+                                                 int a[3][4] = {{1,2,3,4},{5,6,7,8},{9,10,11,12}};                                                                        
+                                                 int (*p)[4] = a;                                                                                                         
+
+55   fill_blank       C_programming  3           C语言中，若要通过函数修改实参的值，应采用 ____ 传递方式；若要避免复制大型结构体的开销同时保留原始数据的只读性，应采用 ____ 传递方式。        指针(地址) 和 常量引用(const引用，C++中)或在C中用const指针 
+
+56   program_reading  C_programming  4           阅读以下程序，写出输出结果：                                                                   负数（如 -1）                                
+                                                 ```c                                                                                                                     
+                                                 #include <stdio.h>                                                                                                       
+                                                 #include <string.h>                                                                                                      
+                                                 int main() {                                                                                                             
+                                                     char                                                                                                                 
+
+57   programming      C_programming  3           编写C语言函数 int str_len(const char *s)，不使用库函数，计算并返回字符串s的长度。                          int str_len(const char *s) {            
+                                                                                                                                      int len                             
+
+58   single_choice    C_programming  2           fopen()函数以"w"模式打开文件时，如果文件已存在会发生什么？                                               C                                       
+
+59   single_choice    C_programming  2           以下哪个函数用于从文件中读取一个字符？                                                              B                                       
+
+60   fill_blank       C_programming  2           C语言中，文件操作完成后应使用 ____ 函数关闭文件，以防止数据丢失和资源泄露。                                        fclose                                  
+
+61   program_reading  C_programming  3           阅读以下程序的功能，写出其输出：                                                                 Hello World 2024                        
+                                                 ```c                                                                                                                     
+                                                 #include <stdio.h>                                                                                                       
+                                                 int main() {                                                                                                             
+                                                     FILE *fp = fopen("test                                                                                               
+
+62   short_answer     C_programming  2           简述C语言中文本文件和二进制文件的区别，以及各自适用场景。                                                    文本文件以ASCII码存储，每个字节对应一个字符，可读性好但有转换开销，适合存储
+
+114  multi_choice     C_programming  3           以下关于C语言指针的说法，正确的有？（多选）                                                           ACDF                                    
+
+115  multi_choice     C_programming  2           以下C语言关键字中，用于循环结构的有？（多选）                                                          ACE                                     
+
+116  programming      C_programming  3           编写C语言程序：输入一个正整数n，判断n是否为素数（质数）。若是输出"YES"，否则输出"NO"。要求时间复杂度O(√n)。                   #include <stdio.h>                      
+                                                                                                                                  #include <math.h>                       
+                                                                                                                                  int                                     

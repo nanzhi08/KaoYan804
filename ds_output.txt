@@ -1,0 +1,172 @@
+id   type           part            difficulty  content                                                                           answer                                  
+---  -------------  --------------  ----------  --------------------------------------------------------------------------------  ----------------------------------------
+12   single_choice  data_structure  2           算法的时间复杂度是指？                                                                       B                                       
+
+13   single_choice  data_structure  2           在长度为n的顺序表中插入一个元素，平均需要移动多少个元素？                                                     B                                       
+
+14   single_choice  data_structure  2           单链表中，删除p所指结点的后继结点，正确的操作是？                                                         A                                       
+
+15   single_choice  data_structure  2           栈的特点是？                                                                            B                                       
+
+16   analysis       data_structure  3           分析以下递归函数的功能：                                                                      功能：计算1到n的累加和（即1+2+...+n）。f(5)=15。       
+                                                ```c                                                                                                                      
+                                                int f(int n) {                                                                                                            
+                                                    if (n == 0) return 0;                                                                                                 
+                                                    else return f(n -                                                                                                     
+
+17   single_choice  data_structure  2           一个10×10的对称矩阵，采用压缩存储（只存下三角部分），需要多少个存储单元？                                           B                                       
+
+18   single_choice  data_structure  2           深度为k的完全二叉树，最多有多少个结点？                                                              B                                       
+
+19   analysis       data_structure  4           已知二叉树的前序遍历序列为 ABDCEF，中序遍历序列为 DBAECF，请画出该二叉树，并写出后序遍历序列。                            后序遍历序列为 DBEFCA。二叉树结构：A为根，左子树B（左D右空），右子树C
+
+20   calculation    data_structure  4           给定字符集 {a, b, c, d, e} 及其权值 {5, 2, 9, 7, 3}，构造哈夫曼树，并写出各字符的哈夫曼编码。                   a:10, b:110, c:00, d:01, e:111。编码不唯一，同权重
+
+21   single_choice  data_structure  3           一个有n个顶点的无向连通图，至少有多少条边？                                                            B                                       
+
+22   single_choice  data_structure  3           使用邻接表存储图时，广度优先遍历(BFS)需要借助的数据结构是？                                                  B                                       
+
+23   single_choice  data_structure  3           对有序表 {2, 5, 8, 12, 16, 23, 38, 45, 56, 67} 进行折半查找，在查找关键字16的过程中，依次被比较的元素是？         A                                       
+
+24   fill_blank     data_structure  3           哈希表处理冲突的方法主要有 ____ 和 ____ 两种。                                                     开放定址法 和 链地址法                            
+
+25   single_choice  data_structure  2           以下哪种排序算法是稳定的？                                                                     B                                       
+
+26   single_choice  data_structure  3           快速排序在什么情况下退化为O(n²)的时间复杂度？                                                         D                                       
+
+27   calculation    data_structure  4           对序列 {49, 38, 65, 97, 76, 13, 27, 50} 进行堆排序，请写出建成的初始大顶堆。                           {97, 76, 65, 50, 49, 13, 27, 38}        
+
+63   single_choice  data_structure  2           以下哪种结构属于数据的逻辑结构？                                                                  C                                       
+
+64   single_choice  data_structure  2           以下程序段的时间复杂度是？                                                                     C                                       
+                                                ```c                                                                                                                      
+                                                for (i = 1; i <= n; i *= 2)                                                                                               
+                                                    for (j = 1; j <= n; j++)                                                                                              
+                                                                                                                                                                          
+
+65   fill_blank     data_structure  1           评价算法优劣的五个主要方面是：____、____、____、____ 和 ____。                                        正确性、可读性、健壮性、时间复杂度（效率）和空间复杂度（存储量）        
+
+66   short_answer   data_structure  2           简述抽象数据类型(ADT)的概念及其三个组成部分。                                                         ADT是指一个数学模型以及定义在该模型上的一组操作。三个组成部分：①数据对象(D
+
+67   single_choice  data_structure  2           顺序存储和链式存储相比，顺序存储的主要优势是？                                                           B                                       
+
+68   single_choice  data_structure  3           在单链表中，要在p所指结点之前插入一个新结点s，以下操作正确的是？（已知头指针为head）                                     C                                       
+
+69   single_choice  data_structure  2           带头结点的单链表head为空的判定条件是？                                                             B                                       
+
+70   fill_blank     data_structure  3           在长度为n的顺序表中删除第i个元素（1≤i≤n），需要向前移动 ____ 个元素，时间复杂度为 ____。                             n-i 和 O(n)                              
+
+71   analysis       data_structure  4           已知两个有序递增的单链表La和Lb（带头结点），请设计算法将它们合并为一个有序递减的单链表，并要求利用原结点空间（不新建结点）。描述算法思路并用C语言实现。    思路：同时遍历La和Lb，比较当前结点值，用头插法将较小的结点插入新链表（头插法
+
+72   programming    data_structure  4           编写C语言函数，实现带头结点单链表的就地逆置（反转），要求空间复杂度为O(1)，不得新建结点。                                   void Reverse(LinkList L) {              
+                                                函数原型：void Reverse(LinkList L);                                                        Node *p =                           
+
+73   single_choice  data_structure  2           若元素a, b, c, d依次入栈，则以下哪个出栈序列是不可能的？                                                 C                                       
+
+74   single_choice  data_structure  3           循环队列用数组A[0..M-1]存储，用front和rear分别指示队头和队尾。入队的操作是？                                   A                                       
+
+75   single_choice  data_structure  2           递归调用过程中，系统使用什么数据结构来保存返回地址和局部变量？                                                   B                                       
+
+76   calculation    data_structure  3           设循环队列的容量为6（下标0~5），初始front=rear=0。经过以下操作序列后，队列中还有几个元素？                             入队G时队列满（上溢）。最终队列有5个元素：C, D, E, F, G。    
+                                                                                                                                                                          
+                                                入队A, 入队B, 出队, 入队C, 入队D, 出                                                                                                 
+
+77   analysis       data_structure  3           已知一个算术表达式为 a+b*(c-d)-e/f，请：(1) 写出其对应的后缀表达式（逆波兰表示法）；(2) 画出将中缀表达式转换为后缀表达式时栈的变化过程。   (1) 后缀表达式：a b c d - * + e f / -         
+                                                                                                                                  (2) 转换过程                                
+
+78   programming    data_structure  4           编写C语言函数，使用栈判断一个字符串中的括号是否匹配。字符串中只包含 '('、')'、'['、']'、'{'、'}' 六种括号。                  int isBalanced(const char *s) {         
+                                                函数原型：int isBala                                                                       char                                
+
+79   single_choice  data_structure  2           设有一个10阶对称矩阵A，采用压缩存储（按行序存储下三角部分，含主对角线），一维数组sa的长度至少为？                               C                                       
+
+80   single_choice  data_structure  3           将三对角矩阵A[1..n][1..n]按行序存储到一维数组B[1..3n-2]中，则A[i][j]在B中的位置k（1≤i,j≤n）为？               B                                       
+
+81   fill_blank     data_structure  2           稀疏矩阵的三元组表示法中，每个三元组由 ____、____ 和 ____ 三部分组成。                                       行号、列号和元素值                               
+
+82   short_answer   data_structure  2           简述广义表(Generalized List)的定义及其与线性表的主要区别。                                            广义表是n(n≥0)个数据元素的有限序列，其中每个元素可以是原子（不可再分的数据
+
+83   single_choice  data_structure  2           一棵完全二叉树有100个结点，则叶子结点数为？                                                           B                                       
+
+84   single_choice  data_structure  2           若二叉树的前序遍历序列和中序遍历序列相同，则该二叉树的特点是？                                                   B                                       
+
+85   single_choice  data_structure  3           在含n个叶子结点的哈夫曼树中，度为2的结点数为？                                                          B                                       
+
+86   single_choice  data_structure  2           将森林F转换为二叉树B，则F中第一棵树的结点个数等于B中什么？                                                   D                                       
+
+87   fill_blank     data_structure  2           一棵深度为k的满二叉树（根深度为1）共有 ____ 个结点。第i层（1≤i≤k）上最多有 ____ 个结点。                            2^k - 1 和 2^(i-1)                       
+
+88   analysis       data_structure  3           已知某二叉树的中序遍历序列为 DBGEHACF，后序遍历序列为 DGHEBFCA，请画出该二叉树，并写出其前序遍历序列。                      前序：ABDEGHCF。二叉树结构：A为根（后序最后），中序中A左边DBGEH为
+
+89   calculation    data_structure  4           给定权值w={2, 3, 6, 8, 9}，请：(1) 构造一棵哈夫曼树；(2) 计算该哈夫曼树的带权路径长度WPL；(3) 给出各叶子结点的哈夫曼编码（设左分  (1) 构造步骤：①选2和3合并得5；②选5和6合并得11；③选8和9合并得17
+
+90   programming    data_structure  4           编写C语言递归函数，求二叉树的深度（高度）。二叉树结点定义如下：                                                  int Depth(BiTree T) {                   
+                                                ```c                                                                                  if (T == NULL)                      
+                                                typedef struct BiTNode {                                                                                                  
+                                                    int data;                                                                                                             
+                                                                                                                                                                          
+
+91   single_choice  data_structure  2           在一个无向图中，所有顶点的度之和等于图中边数的多少倍？                                                       C                                       
+
+92   single_choice  data_structure  2           具有n个顶点的有向完全图，边的数量为？                                                               A                                       
+
+93   single_choice  data_structure  2           用邻接矩阵存储含有n个顶点的图，则该矩阵的大小是？                                                         C                                       
+
+94   single_choice  data_structure  3           以下关于拓扑排序的描述，错误的是？                                                                 D                                       
+
+95   single_choice  data_structure  3           Prim算法用于求解什么问题的？其时间复杂度是多少（用邻接矩阵存储）？                                               B                                       
+
+96   fill_blank     data_structure  2           图的遍历主要有两种方法：____ 和 ____。其中 ____ 需要使用队列辅助实现。                                       深度优先遍历(DFS)、广度优先遍历(BFS)和BFS             
+
+97   calculation    data_structure  4           已知下图用邻接矩阵表示如下。求从顶点0出发的Dijkstra最短路径（到各顶点的最短距离和路径）。                                 从顶点0出发：到0:0(0)；到1:8(0→4→1)；到2:9(0→4→1→2)
+                                                                                                                                                                          
+                                                图：n=5，边和权值为：0-1:10, 0-4:5, 1-                                                                                             
+
+98   short_answer   data_structure  3           简述关键路径的概念及其在项目管理中的应用意义。                                                           关键路径是AOE网（边表示活动的网）中从源点到汇点的最长路径，其长度等于整个工程
+
+99   single_choice  data_structure  2           在有序表 {3, 5, 8, 10, 15, 20, 25, 30} 中使用折半查找关键字30，比较次数为？                            D                                       
+
+100  single_choice  data_structure  3           在哈希表中，负载因子α的定义是？当α增大时，平均查找长度ASL会如何变化？                                             B                                       
+
+101  single_choice  data_structure  3           在一个空的二叉排序树(BST)中依次插入关键字 5, 2, 8, 1, 4, 7, 9，则该BST的中序遍历序列是？                        B                                       
+
+102  fill_blank     data_structure  2           分块查找（索引顺序查找）中，索引表是 ____（有序/无序）的，每个块内的记录 ____（有序/无序）。平均查找长度为 ____ 之和。              有序、可以无序和查找索引表与查找块内记录                    
+
+103  calculation    data_structure  4           给定关键字序列 {19, 14, 23, 1, 68, 20, 84, 27, 55, 11, 10, 79}，哈希函数 H(key)=key%13，采用线性探  (1) 哈希表[0..15]：                         
+                                                                                                                                  H(19)=6→[6]=19,                         
+                                                                                                                                  H(14)=1→                                
+
+104  single_choice  data_structure  3           以下排序算法中，在最好情况下时间复杂度为O(n)的是？                                                       B                                       
+
+105  single_choice  data_structure  2           对序列 {8, 3, 5, 1, 9, 6} 进行一趟希尔排序（增量d=3），结果可能是？                                     B                                       
+
+106  single_choice  data_structure  3           归并排序的空间复杂度是？                                                                      C                                       
+
+107  fill_blank     data_structure  2           快速排序的核心操作是 ____，其平均时间复杂度为 ____，最坏时间复杂度为 ____。                                     划分(Partition)、O(n log n)和O(n²)          
+
+108  fill_blank     data_structure  3           基数排序（最低位优先LSD）的时间复杂度为 ____，其中d为关键字位数，r为基数，n为记录数。该排序算法 ____（是/否）稳定的。               O(d(n+r)) 和 是                           
+
+109  calculation    data_structure  4           对序列 {49, 38, 65, 97, 76, 13, 27, 50} 进行堆排序（大顶堆），请：(1) 画出初始建堆过程；(2) 写出前两趟排序（即选出前两  (1) 从n/2=4开始调整。调整97(76已≥子)，调整65(13,27<65
+
+110  multi_choice   data_structure  3           以下哪些排序算法是稳定的？（多选）                                                                 ABDF                                    
+
+111  analysis       data_structure  4           已知一组记录的关键字为 {46, 79, 56, 38, 40, 84}，请分别给出使用以下排序算法第一趟排序后的结果：                      (1) 直接插入排序第一趟（将第2个元素79插入有序表{46}）：{46, 79
+                                                (1) 直接插入排序                                                                                                                
+                                                (2) 冒泡排序                                                                                                                  
+
+112  multi_choice   data_structure  3           以下关于二叉树的叙述中，正确的有？（多选）                                                             ABDEF                                   
+
+113  short_answer   data_structure  3           比较顺序存储（数组）和链式存储（链表）的优缺点，并说明各自适用场景。                                                顺序存储优点：①支持随机存取O(1)；②存储密度高（只存数据）；③实现简单。缺点
+
+117  programming    data_structure  4           编写C语言函数，统计二叉树的叶子结点个数。                                                             int CountLeaf(BiTree T) {               
+                                                ```c                                                                                  if (T == N                          
+                                                typedef struct BiTNode {                                                                                                  
+                                                    int data;                                                                                                             
+                                                    struct BiT                                                                                                            
+
+118  programming    data_structure  4           编写C语言函数，在有序递增的顺序表中折半查找关键字key。查找成功返回其下标（从0开始），失败返回-1。                              int BinarySearch(SeqList L, int key) {  
+                                                顺序表类型定义：                                                                                                                  
+                                                ```c                                                                                                                      
+                                                typedef struc                                                                                                             
+
+119  programming    data_structure  3           编写C语言函数，用直接插入排序对整数数组a[0..n-1]进行升序排序。                                              void InsertSort(int a[], int n) {       
+                                                                                                                                      in                                  

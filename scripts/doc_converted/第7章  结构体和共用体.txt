@@ -1,0 +1,264 @@
+7.4  课后习题
+7.4.1  项目练习
+ 一．练习目的
+  1．进一步巩固结构体类型和共用体类型的定义与引用
+  2．进一步复习链表的建立过程
+  3．进一步巩固枚举类型的定义与枚举元素的引用方法
+ 二．练习内容
+　1． 用结构体变量表示平面上的一个点（横坐标和纵坐标），输入两个点，求两点之间的距离。
+#include "stdio.h"
+#include "math.h"
+ struct pin
+{float x;
+ float y;
+}a,b;
+main()
+{
+  printf("请输入a点的横纵坐标:");
+  scanf("%f%f",&a.x,&a.y); 
+  printf("\n");
+  printf("请输入b点的横纵坐标:");
+  scanf("%f%f",&b.x,&b.y); 
+  printf("\n");
+printf("输出a、b两点之间的距离是:%f",sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y)));
+  getch(); 
+}
+　2．16个同学围成一圈，从第1个人开始按1、2、3的顺序报号，凡报到3者退出圈子。找出最后留在圈子中的人原来的序号。
+　#include "stdio.h"
+　#include "stdlib.h"
+　#define LEN sizeof(struct game)
+　struct game{
+　    int num;
+　    struct game *next;};
+　struct game *creat()
+　{    struct game *head,*p;
+　    head=p=(struct game *) malloc(LEN);
+　    p->num=1;
+　    int i=2;
+　    while(i<=16)
+　    {  p->next=(struct game *) malloc(LEN);
+　        p->next->num=i;
+　        i++;
+　        p=p->next;    }
+　    p->next=head;
+　    return(head);}
+　struct game *delete(struct game *head)
+　{    struct game *p1=head,*p2=head,*x;
+　    int k=1;
+　    while(p1->next!=p1) {
+　        if(k==3) {
+　            x=p1;
+　            p1=p1->next;
+　            p2->next=p1;
+　            free(x);
+　            x=NULL;
+　            k=0;
+　        } else {
+　            p2=p1;
+　            p1=p1->next;
+　        }
+　        k++;
+　    }
+　    p1->next=NULL;
+　    return(p1);
+　}
+　void print(struct game *head)
+　{    struct game *p;
+　    p=head;
+　    while(p!=NULL) {
+　        printf("%d\t",p->num);
+　        p=p->next;
+　    }
+　    printf("\n");
+　}
+　main()
+　{    struct game *pt,*p;
+　    pt=creat();
+　    p=delete(pt);
+　    print(p);
+　    free(p);
+　getch();
+　}
+　3．建立一个链表，每个结点包含的成员为：职工号、工资。用malloc函数开辟新结点。要求链表包含5个结点，从键盘输入结点中的数据。然后把这些结点的数据打印出来。要求用函数creat来建立函数，用list函数来输出数据。这5个职工的号码为10,11,12,13,14。用insert函数来新增一个职工的数据，这个新结点，按职工号顺序插入。用delete函数来删除一个结点。
+　# include <stdio.h>
+　#include <malloc.h>
+　struct Worker
+　{   
+　 int num;
+　 float pay;
+　 struct Worker *next;
+　};
+　int n;
+　
+　int main()
+　{   
+　 struct Worker *head,*create(void);
+　 void list(struct Worker*);
+　 head=create();
+　 list(head);
+　 return 0;
+　}
+　
+　struct Worker *create(void)
+　{   
+　 struct Worker *head, *p1, *p2;
+　 printf("create a linked list:\n");
+　 head=0;
+　 n=0;
+　 p1=p2=(struct Worker*)malloc(sizeof(struct Worker));
+　 scanf("%d%f",&p1->num,&p1->pay);
+　 while(p1->num!=0)
+　 {   
+　  n++;
+　  if(n==1)head=p1;
+　  else p2->next=p1 ;
+　  p2=p1;
+　  p1=(struct Worker*)malloc(sizeof(struct Worker));
+　  scanf("%d%f",&p1->num,&p1->pay);
+　 }
+　 p2->next=0;
+　 free(p1); 
+　 return head;
+　}
+　
+　void list(struct Worker *p)
+　{   
+　 printf("The linked list:\n");
+　 while( p!=0 )
+　 {   
+　  printf("\n%\t%f",p->num,p->pay); 
+　  p=p->next;
+　 }
+　}
+7.4.2 练习题
+一．填空题
+1．若程序中有下面的说明和定义
+ struct abc
+ {int x;char y;}
+ struct abc s1,s2;
+则会发生的情况是（   A    ）。
+（A） 编译出错????????????????????????（B）程序将顺利编译、连接、执行
+（C）能顺利通过编译、连接、但不能执行?? （D） 能顺利通过编译，但连接出错
+2．以下scanf函数调用语句中对结构体变量成员的不正确引用是（   D    ）。
+struct pupil
+{ char name[20]; int age; int sex;} pup[5],*p;  p=pup;
+（A）scanf("%s",pup[0].name);       （B）scanf("%d",&pup[0].age);
+（C）scanf("%d",&(p->sex));         （D）scanf("%d",p->age);
+3．以下对结构体变量stul中成员age的非法引用是（  B    ）。
+struc  student
+{ int age;  int num;  }stul,*P;  p=&stul;
+（A）stul.age       （B）student.age     （C）p->age   （D）(*p).age
+4．设有以下说明和定义语句，则下面表达式中值为3的是（  D    ）。
+struct s
+{ int i1;  struct s *i2;};
+struct s a[3]={1,&a[1],2,&a[2],3,&a[0]},*ptr;
+ptr=&a[1];
+（A）ptr->i1++   （B）ptr++->i1  （C）*ptr->i1   (D）++ptr->i1
+5．若要利用下面的程序片段使指针变量p指向一个存储整型变量的存储单元，则空中应填入的内容是（   D    ）。
+　int *p;     p=_____________malloc(sizeof(int));
+（A）int       （B）int *  （C）(*int)    （D）(int *)
+6．设有如下定义：
+struct sk
+{ int n; float x;}data,*p;
+若要使p指向data中的n域，正确的赋值语句是（   C    ）。
+（A）p=&data.n;                （B）*p=data.n;   
+（C）p=(struct sk *)&data.n;      （D）p=(struct sk *)data.n;
+7．设有以下语句：
+struct st
+{ int n; struct st *next;  };
+struct st a[3]={5,&a[1],7,&a[2],9,'\0'},*p;  p=&a[0];  则以下表达式的值为6的是（  D    ）。
+（A）p++->n     （B）p->n++      （C）(*p).n++      （D）++p->n
+8．以下程序的输出结果是（   C    ）。
+struct stu
+{ int x;  int *y;  }*p;
+int dt[4]={10,20,30,40};
+struct stu a[4]={50,&dt[0],60,&dt[1],70,&dt[2],80,&dt[3]};
+main()
+{ p=a; printf("%d",++p->x); printf("%d",(++p)->x); printf("%d\n",++(*p->y));}
+（A）50,20,20   （B）50,20,21      （C）51,60,21      （D）51,60,31
+9．以下对C语言中共用体类型数据的叙述正确的是（   C    ）。
+（A）可以对共有体变量名直接赋值    （B）一个共用体变量中可以同时存放其所有成员
+（C）一个共有体变量中不能同时存放其所有成员
+（D）共用体类型定义中不能出现结构体类型的成员
+10．当说明一个共用体变量时系统分配给它的内存是（   C    ）。
+（A）各成员所需内存量的总和       （B）结构中第一个成员所需内存量
+（C）成员中占内存量最大者所需的容量      （D）结构中最后一个成员所需内存量
+11．若有下面的说明和定义，则sizeof(struct aa） 的值是（   D    ）。
+struct aa
+{ int r1;double r2; float r3;
+union uu{char u1[5]; long u2[2]; } ua;
+} mya;
+（A）30??????? （B）29?????? （C）24??????? （D）22
+12．字符'0'的ASCII码的十进制数为48,且数组的第0个元素在低位,则以下程序的输出结果是（   B    ）。
+main()
+{union {int i[2];long k;char c[4];}r,*s=&r;
+s->i[0]=0x39;
+s->i[1]=0x38;
+printf("%c",s->c[0]);
+getch();}
+（A） 39?????? （B） 9?????? （C） 38?????? （D） 8
+13．设有以下定义:
+typedef union { long i;int k[5];char c;}DATE;
+struct date { int cat;DATE cow;double dog;}too;
+DATE max;
+则下列语句的执行结果是（   A    ）。
+printf("%d",sizeof(struct date)+sizeof(max));
+（A） 25?????? （B） 30?????? （C） 18????? （D） 8
+14．以下对枚举类型名的定义中正确的是（   B    ）。
+（A）enum a={one,two,three};????????? （B）enum a {one=9,two=-1,three};
+（C）enum a={"one","two","three"};??? （D）enum a {"one","two","three"};
+15．设有定义 enum	  date {year，month，day}  d ；则下列叙述中正确的是（   A    ）。
+（A） date是类型、d是变量、year是常量
+（B） date是类型、d和year是变量
+（C） date和d是类型、year是常量
+（D） date和d是变量、year是常量
+16． 设有定义 enum	  date {year，month，day}  d ；则正确的表达式是（   B    ）。
+（A）  year=1			（B） d=year
+（C） d="year"			（D） date="year"
+二．填空题
+1．若有定义：
+? struct? num
+? {int a;
+??? int b;
+??? float? f;
+?? }n={1,3,5.0};
+? struct num *pn=&n;
+? 则表达式pn->b/n.a*++pn->b的值是（   12    ）。表达式(*pn).a+pn->f的值是（   0    ）。
+3. 以下程序的运行结果是（   7,3    ）。
+?struct ks
+  {int a;  int *b; }s[4],*p;
+  main()
+  {int n=1,i;
+  printf("\n");
+  for(i=0;i<4;i++)
+   { s[i].a=n;
+     s[i].b=&s[i].a;
+     n=n+2;     }
+  p=&s[0];  p++;
+  printf("%d,%d\n",(++p)->a,*((p++)->b)); 
+　　getch();}
+4.结构数组中存有三人的姓名和年龄，以下程序输出三人中最年长者的姓名和年龄。请在_______内填入正确内容。
+?struct man{ 
+　　char name[20];
+???int age; }person[]={"li=ming",18, "wang-hua",19, zhang-ping",20 }; ?
+? main()
+? {struct man *p,*q;
+?? int old=0
+?? p=person;
+? for(? ;p_!=person[3]_________;p++)
+??? if(old<p->age)
+???? {q=p;___(old=p->age)_______;}
+?? printf("%s %d",_(q->name),q->age___________);  }?
+5. 以下程序段的功能是统计链表中结点的个数，其中first为指向第一个结点
+的指针（链表不带头结点）。请在______内填入正确内容。
+? struct link
+? {char data ;
+?? struct link *next;
+? }; 
+? ....
+? struct link *p,*first;
+? int c=0;
+? p=first;
+? while(__!=NULL________)
+?? {___c++_________;
+??? p=__p->next__________; }

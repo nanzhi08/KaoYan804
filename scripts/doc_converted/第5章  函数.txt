@@ -1,0 +1,210 @@
+5.6 课后习题
+5.6.1  项目练习
+一．练习目的
+ 1．进一步巩固函数的定义方法及引用方法
+ 2．进一步巩固函数的嵌套调用与递归调用
+ 3．进一步了解标识符的作用域和存储类
+ 4．进一步巩固宏定义及引用方法
+二．练习内容	
+1．编写函数对输入一个整数进行判断，若是“此数是偶数”，否则输出“此数是奇数”。
+#include "stdio.h"
+int func(int x)
+{if(x%2==0)
+return 0;}
+
+main()
+{int a;
+scanf("%d",&a);
+if(func(a)==0)
+printf("此数%d是偶数\n",a);
+else 
+printf("此数%d是奇数\n",a);
+   getch();
+}
+
+2．编写函数来根据以下近似公式求π值：(π*π)/6=1+1/(2*2)+1/(3*3)+..+1/(n*n)
+
+#include "stdio.h"
+#include  "math.h"
+double pai(int n)
+{ double s=0.0; 
+int i;
+for(i=1;i<=n;i++) 
+s=s+1.0/(i*i) ;
+return (sqrt(6*s));  }
+
+main()
+{ int m;
+  scanf("%d",&m);
+  double sum;
+  sum=pai(m);
+  printf("%lf",sum);
+  getch();
+  }
+
+2．编写函数，计算下列级数之和。S=1＋x+x2/2!+x3/3!+........+xn/n!
+  #include "stdio.h"
+int fenzi(int x, int n)
+{
+     int i ;
+     int sum=1;
+     for(i=1;i<=n;i++) 
+     {
+        sum=sum*x;
+     }
+     return sum;
+}
+
+int fenmu(int n)    
+{
+    int i;
+    int sum=1;
+    for(i=1;i<=n;i++)
+    {
+       sum*=i;
+    }
+    return sum;
+}
+
+main()
+{
+     int i;
+     int x, n;
+     float chengfang,jiecheng;
+     scanf("%d", &x);    
+     scanf("%d", &n);   
+   float  sum=1;  
+      for(i=1; i<=n; i++) 
+      {    
+        chengfang=fenzi(x,i);     
+       jiecheng=fenmu(i);         
+             sum=sum+chengfang/jiecheng;  
+           }
+   printf("%f",sum);
+   getch();
+}
+
+4．用函数递归方法计算菲波那契数列，1，1，2，3，5，8，13，21，……，直到计算第20项为止。
+#include "stdio.h"
+int  sum(int  n)
+{
+     if(n==1)
+         return 1;
+    else if(n==2)
+         return 1;
+    else if(n==3)
+         return 2;
+    else 
+         return  sum(n-1)+sum(n-2);
+}
+main()
+{int term,i;
+ for(i=1;i<=20;i++)
+ printf("%d\n",sum(i));
+   getch();
+  }
+5.6.2 练习题
+一．选择题
+1．以下正确的说法是（   C     ）。
+(A)用户若需要调用标准库函数，调用前必须重新定义
+(B)用户可以重新定义标准库函数，如若此，该函数将失去原有定义
+(C)系统不允许用户重新定义标准库函数
+(D)用户若需要使用标准库函数，调用前不必使用预处理命令将该函数所在的头文件包含编译，系统会自动调用。
+2．以下正确的函数定义是（   A     ）。
+(A)double fun(int x, int y)      (B）double fun(int x,y)
+　　{ z=x+y ; return z ; }             { int z ; return z ;}
+(C)fun (x,y)                     (D)double fun (int x, int y)
+　　{ int x, y ; double z ;            { double z ;
+　　z=x+y ; return z ; }               return z ; }
+3．以下正确的函数定义是（   A     ）。
+(A）double fun(int x , int y)        (B) double fun(int x ; int y)
+(C) double fun(int x , int y) ;       (D) double fun(int x,y)
+4．C语言规定，函数返回值的类型是由（   D     ）决定的。
+(A)return语句中的表达式类型           (B)调用该函数时的主调函数类型
+(C)调用该函数时由系统临时             (D)在定义函数时所指定的函数类型
+5．如果在一个函数中的复合语句中定义了一个变量，则该变量（   A     ）。
+(A)只在该复合语句中有定义            (B)在该函数中有定义
+(C)在本程序范围内有定义              (D)为非法变量
+6．在C语言中，函数的数据类型是指（    A    ）。
+(A)函数返回值的数据类型                 (B)函数形参的数据类型
+(C)调用该函数时的实参的数据类型         (D)任意指定的数据类型
+7．一个函数内有数据类型说明语句如下：
+　　　double x,y,z(10)；
+关于此语句的解释，下面说法正确的是（   D     ）。
+(A)z是一个数组，它有10个元素。
+(B)z是一个函数，小括号内的10是它的实参的值。
+(C)z是一个变量，小括号内的10是它的初值。
+(D)语句中有错误。
+8．以下c语言函数声明中，不正确的是（   C     ）。
+(A)void  fun（int x， int y）；  (B)fun（int x， int y）；
+(C)int  fun（int x，y）；  (D)char  *fun（char *s）；
+9．以下正确的说法是（   A    ）。
+(A)实参和与其对应的形参各占用独立的存储单元
+(B)实参和与其对应的形参共占用一个存储单元
+(C)只有当实参和与其对应的形参同名时才共占用相同的存储单元
+(D)形参时虚拟的，不占用存储单元
+10．C语言规定，简单变量做实参时，它和对应的形参之间的数据传递方式是（  B   ）。
+(A)地址传递                          (B)值传递
+(C)有实参传给形参，再由形参传给实参  (D)由用户指定传递方式
+11 函数调用语句func（（exp1，exp2），（exp3，exp4，exp5））；中，实参的个数为（   B     ）。
+(A)1      (B)2        (C)4      (D)5
+12．有如下函数调用语句func(rec1,rec2+rec3,(rec4,rec5));
+该函数调用语句中，含有的实参个数是（   D     ）。
+(A)3        (B)4        (C)5        (D)有语法错
+13．以下正确的描述是（   B     ）。
+(A)函数的定义可以嵌套，但函数的调用不可以嵌套
+(B)函数的定义不可以嵌套，但函数的调用可以嵌套
+(C)函数的定义和函数的调用均不可以嵌套
+(D)函数的定义和函数的调用均可以嵌套
+14．在函数调用过程中，如果函数funA调用了函数funB,函数funB又调用了函数funA，则称为（   B     ）。
+(A)函数的直接递归调用    (B)函数的间接递归调用
+(C)函数的循环调用        (D)C语言中不允许这样的递归调用
+15．C语言允许函数值类型缺省定义，此时该函数值隐含的类型是（   B     ）。
+(A)float     (B)int        (C)long     (D)double
+16． 以下叙述中正确的是（   B     ）。
+(A)全局变量的作用域一定比局部变量的作用域大
+(B)静态(static)类型变量的生存期贯穿于整个程序的运行期间
+(C)函数的形参都属于全局变量
+(D)未在定义语句中赋初值的auto变量和static变量的初值都是随机值
+17．以下有宏替换不正确的叙述是（   D    ）。
+(A)宏替换不占用运行时间          (B)宏名无类型
+(C)宏替换只是字符串替换          (D)宏名必须用小写字母表示
+18．程序中定义以下宏 #define S(a,b) a*b，若定义 int  area；且令area=S(3+1,3+4)，则变量area的值为（   A    ）。
+(A)10    (B)12    (C)21    (D)28
+
+二．填空题
+1．C语言函数返回类型的默认定义类型是（   int     ）。
+2．若自定义函数要求返回一个值，则应在该函数体中有一条（   return     ）语句，若自定义函数要求不返回一个值，则应在该函数说明时加一个类型说明符（   void     ）。
+3．C语言的预处理语句以（   #     ）开头。
+4．C语言程序是由（    函数     ）构成的，而C语言的函数是由（  函数体    ）构成的。
+5．函数的实参传递到形参有两种方式：（   值传递    ）和 （   地址传递    ）。
+6.  请读程序:
+#include  "stdio.h"
+int func(int a,int b)
+{int c;
+ c=a+b;
+ return c;}
+
+main()
+{int x=6,y=7,z=8,r;
+r=func((x--,y--,x+y),z--);
+printf("%d\n",r);  getch();}
+上面程序的输出结果是（   19    ）。
+7.  有以下程序?
+void fun(int a,int b,int c)
+{a=456;b=567;c=678;}
+main()
+{int x=10,y=20,z=30;
+fun(x,y,z);
+printf("%d,%d,%d",x,y,z);  getch(); }
+输出结果是?（   10，20，30    ）。
+8．C语言变量按其作用域分为（  全局变量    ）和（   局部变量    ）。
+9．C语言变量的存储类别有（  自动auto    ），（   寄存器变量register  ），（   静态局部变量static    ）和（  静态全局变量static    ）。
+10.  请选出以下程序段的输出结果（  15    ）。
+#include<stdio.h>
+#define MIN(x,y)  (x)<(y)? (x):(y)
+main()
+{ int i,j,k;
+i=10; j=15;
+k=10*MIN(i,j);
+printf("%d\n",k);  getch();   }

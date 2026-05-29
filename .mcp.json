@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "tavily": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "tavily-mcp@latest"],
+      "env": {
+        "TAVILY_API_KEY": "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"
+      }
+    },
+    "paddleocr": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--from", "paddleocr-mcp[local-cpu]", "paddleocr_mcp"],
+      "env": {
+        "PADDLEOCR_MCP_PIPELINE": "OCR",
+        "PADDLEOCR_MCP_PPOCR_SOURCE": "local",
+        "PADDLEOCR_MCP_DEVICE": "cpu",
+        "PADDLEOCR_MCP_TIMEOUT": "120"
+      }
+    }
+  }
+}

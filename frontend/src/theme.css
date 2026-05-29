@@ -1,0 +1,130 @@
+/* ========== 考研804知识库系统 - 静思书房 主题 ========== */
+
+:root {
+  /* ---- 主色调 ---- */
+  --color-primary: #4A5BC9;
+  --color-primary-light: #E8EAFA;
+  --color-primary-dark: #3A49A8;
+  --color-primary-bg: #F0F1FC;
+
+  /* ---- 科目色 ---- */
+  --color-c: #4A5BC9;
+  --color-c-light: #EDEFFB;
+  --color-ds: #3D8B5E;
+  --color-ds-light: #ECF5EF;
+
+  /* ---- 功能色 ---- */
+  --color-success: #D4A853;
+  --color-success-light: #FDF8EF;
+  --color-error: #C56C6C;
+  --color-error-light: #FDF0F0;
+  --color-warning: #D4953A;
+  --color-warning-light: #FDF5EA;
+
+  /* ---- 中性色 ---- */
+  --color-bg: #FAF7F2;
+  --color-surface: #FFFFFF;
+  --color-border: #E8E3DC;
+  --color-border-light: #F0ECE5;
+  --color-text: #2C2C2C;
+  --color-text-secondary: #6B6560;
+  --color-text-muted: #9B9590;
+
+  /* ---- 侧边栏 ---- */
+  --color-sidebar: #2A2D35;
+  --color-sidebar-hover: #363A44;
+  --color-sidebar-active: #3D4250;
+  --color-sidebar-text: #C8CCD4;
+  --color-sidebar-text-active: #FFFFFF;
+
+  /* ---- 阴影 ---- */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 12px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.04);
+
+  /* ---- 圆角 ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  /* ---- 字体 ---- */
+  --font-display: 'LXGW WenKai', 'KaiTi', 'STKaiti', serif;
+  --font-body: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* ---- 间距 ---- */
+  --space-page: 28px;
+  --space-section: 20px;
+  --space-card-padding: 24px;
+
+  /* ---- 动画 ---- */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---- 页面进入动画 ---- */
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: pageFadeIn var(--transition-slow) forwards;
+}
+
+/* ---- 卡片微动效 ---- */
+@keyframes cardHover {
+  from { transform: translateY(0); box-shadow: var(--shadow-card); }
+  to   { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+}
+
+/* ---- 统计卡片装饰条 ---- */
+.stat-card-stripe {
+  position: relative;
+  overflow: hidden;
+}
+.stat-card-stripe::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+}
+
+/* ---- 代码块基础样式 ---- */
+.code-block {
+  background: #1E1E2E;
+  color: #CDD6F4;
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+/* ---- 渐变强调条 ---- */
+.accent-bar {
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-ds));
+}
+
+/* ---- 自定义滚动条 ---- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D0CCC5;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B0ACA5;
+}
