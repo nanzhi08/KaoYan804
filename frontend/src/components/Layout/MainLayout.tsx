@@ -10,6 +10,7 @@ import {
   FormOutlined,
   ExclamationCircleOutlined,
   MenuOutlined,
+  HistoryOutlined,
 } from '@ant-design/icons';
 
 import KeepAlive from './KeepAlive';
@@ -20,6 +21,7 @@ import AITutor from '../../pages/AITutor';
 import MockExam from '../../pages/MockExam';
 import Documents from '../../pages/Documents';
 import WrongRecords from '../../pages/WrongRecords';
+import AIHistory from '../../pages/AIHistory';
 
 const { Sider, Content, Header } = Layout;
 
@@ -29,6 +31,7 @@ const menuItems = [
   { key: '/practice', icon: <EditOutlined />, label: '刷题练习' },
   { key: '/wrong-records', icon: <ExclamationCircleOutlined />, label: '错题记录' },
   { key: '/ai-tutor', icon: <RobotOutlined />, label: 'AI导师' },
+  { key: '/ai-history', icon: <HistoryOutlined />, label: '历史回答' },
   { key: '/mock-exam', icon: <FormOutlined />, label: '模拟考试' },
   { key: '/documents', icon: <FileTextOutlined />, label: '资料管理' },
 ];
@@ -44,6 +47,7 @@ const pages: PageConfig[] = [
   { path: '/practice', component: <Practice /> },
   { path: '/wrong-records', component: <WrongRecords /> },
   { path: '/ai-tutor', component: <AITutor /> },
+  { path: '/ai-history', component: <AIHistory /> },
   { path: '/mock-exam', component: <MockExam /> },
   { path: '/documents', component: <Documents /> },
 ];

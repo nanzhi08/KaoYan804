@@ -2,13 +2,14 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   Card, Select, Button, Space, Radio, Input, Tag, Spin, Empty, Result, Divider,
-  Checkbox, Slider, Table, Statistic, Row, Col, Progress, Tabs, List, Badge
+  Checkbox, Slider, Table, Statistic, Row, Col, Progress, Tabs, List, Badge, Modal,
 } from 'antd';
 import {
   PlayCircleOutlined, LeftOutlined, RightOutlined,
   ClockCircleOutlined, HistoryOutlined, AppstoreOutlined,
-  CodeOutlined, RadarChartOutlined, FileTextOutlined
+  CodeOutlined, RadarChartOutlined, FileTextOutlined, RobotOutlined,
 } from '@ant-design/icons';
+import ChatWindow from '../../components/AIChat/ChatWindow';
 import { fetchRandomQuestions, submitPractice, fetchPracticeHistory, fetchPracticeStats, fetchChapterSummaries, fetchAllQuestionsByChapter } from '../../services/questionApi';
 import { usePracticeStore } from '../../stores/usePracticeStore';
 import { QuestionTypeLabel } from '../../types';
@@ -115,8 +116,29 @@ const QuizView: React.FC<{ onBack: () => void; mode: string }> = ({ onBack, mode
   const [mcSelected, setMcSelected] = useState<string[]>([]);
   const [timer, setTimer] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [aiInitialMsg, setAiInitialMsg] = useState('');
 
   const currentResult = results[question?.id];
+
+  // Copy detection → open AI mini window
+  const handleQuestionCopy = useCallback(() => {
+    if (!question) return;
+    const text = [
+      question.content,
+      question.code_snippet ? `\n代码:\n${question.code_snippet}` : '',
+      question.options ? `\n选项:\n${Object.entries(question.options).map(([k, v]) => `${k}. ${v}`).join('\n')}` : '',
+    ].filter(Boolean).join('\n');
+
+    navigator.clipboard.readText().then((clipText) => {
+      const cleanClip = clipText.replace(/\s+/g, '');
+      const cleanQ = text.replace(/\s+/g, '').substring(0, 40);
+      if (cleanClip.includes(cleanQ)) {
+        setAiInitialMsg(`请帮我讲解这道题目：\n\n${text}`);
+        setAiModalOpen(true);
+      }
+    }).catch(() => {});
+  }, [question]);
 
   // Timer
   useEffect(() => {
@@ -175,7 +197,10 @@ const QuizView: React.FC<{ onBack: () => void; mode: string }> = ({ onBack, mode
       {/* Progress bar */}
       <Progress percent={Math.round(((currentIndex + 1) / questions.length) * 100)} size="small" style={{ marginBottom: 12 }} />
 
-      <Card title={<div style={{ whiteSpace: 'pre-wrap', fontSize: 16, lineHeight: 1.8 }}>{question.content}</div>}>
+      <Card
+        title={<div style={{ whiteSpace: 'pre-wrap', fontSize: 16, lineHeight: 1.8 }}>{question.content}</div>}
+        onCopy={handleQuestionCopy}
+      >
         {question.code_snippet && (
           <pre className="code-block">
             <code>{question.code_snippet}</code>
@@ -260,6 +285,18 @@ const QuizView: React.FC<{ onBack: () => void; mode: string }> = ({ onBack, mode
           </div>
         )}
       </Card>
+
+      {/* AI 小窗 — 复制题目后弹出 */}
+      <Modal
+        title={<span><RobotOutlined style={{ marginRight: 8 }} />AI 导师</span>}
+        open={aiModalOpen}
+        onCancel={() => setAiModalOpen(false)}
+        width={680}
+        footer={null}
+        destroyOnClose={false}
+      >
+        <ChatWindow provider="deepseek" compact initialMessage={aiInitialMsg} />
+      </Modal>
     </div>
   );
 };
