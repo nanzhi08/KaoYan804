@@ -218,7 +218,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ knowledgePoint, provider, initi
     setError(null);
   };
 
-  const msgListHeight = compact ? 260 : 'calc(100vh - 240px)';
+  const msgListHeight = compact ? 520 : 'calc(100vh - 240px)';
 
   return (
     <>
