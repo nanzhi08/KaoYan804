@@ -104,12 +104,27 @@ async def build_review_prompt(db: AsyncSession, question_id: int, user_answer: s
 4. 相关的知识点回顾"""
 
 
+def _make_title(messages: list[dict], kp_id: int | None = None) -> str:
+    """Generate conversation title from first user message."""
+    for m in messages:
+        if m["role"] == "user":
+            content = m["content"].strip()
+            # Remove common prefixes
+            content = content.replace("请帮我讲解这道题目：", "").strip()
+            content = content.replace("请帮我详细讲解【", "").replace("】这个知识点。", "").strip()
+            # Truncate and clean
+            title = content.split('\n')[0][:40]
+            return title if title else "新对话"
+    return "新对话"
+
+
 async def get_or_create_conversation(
     db: AsyncSession,
     conversation_id: int | None,
     provider: str,
     kp_id: int | None = None,
     question_id: int | None = None,
+    first_user_message: str = "",
 ) -> AIConversation:
     if conversation_id:
         result = await db.execute(
@@ -119,10 +134,12 @@ async def get_or_create_conversation(
         if conv:
             return conv
 
+    title = first_user_message.split('\n')[0][:40] if first_user_message else "新对话"
     conv = AIConversation(
         provider=provider,
         knowledge_point_id=kp_id,
         question_id=question_id,
+        title=title,
         messages=[],
     )
     db.add(conv)
@@ -216,7 +233,12 @@ async def chat_stream(
 ) -> AsyncIterator[tuple[str, AIConversation]]:
     _ensure_message_ids(messages)
     provider = get_provider(provider_name)
-    conv = await get_or_create_conversation(db, conversation_id, provider_name, kp_id, question_id)
+    first_msg = ""
+    for m in messages:
+        if m["role"] == "user":
+            first_msg = m["content"]
+            break
+    conv = await get_or_create_conversation(db, conversation_id, provider_name, kp_id, question_id, first_msg)
 
     full_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 

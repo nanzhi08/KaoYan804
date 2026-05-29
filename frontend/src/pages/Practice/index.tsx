@@ -121,23 +121,17 @@ const QuizView: React.FC<{ onBack: () => void; mode: string }> = ({ onBack, mode
 
   const currentResult = results[question?.id];
 
-  // Copy detection → open AI mini window
-  const handleQuestionCopy = useCallback(() => {
+  // Open AI mini window with current question context
+  const handleAskAI = useCallback(() => {
     if (!question) return;
     const text = [
       question.content,
       question.code_snippet ? `\n代码:\n${question.code_snippet}` : '',
-      question.options ? `\n选项:\n${Object.entries(question.options).map(([k, v]) => `${k}. ${v}`).join('\n')}` : '',
+      question.options && Object.keys(question.options).length > 0
+        ? `\n选项:\n${Object.entries(question.options).map(([k, v]) => `${k}. ${v}`).join('\n')}` : '',
     ].filter(Boolean).join('\n');
-
-    navigator.clipboard.readText().then((clipText) => {
-      const cleanClip = clipText.replace(/\s+/g, '');
-      const cleanQ = text.replace(/\s+/g, '').substring(0, 40);
-      if (cleanClip.includes(cleanQ)) {
-        setAiInitialMsg(`请帮我讲解这道题目：\n\n${text}`);
-        setAiModalOpen(true);
-      }
-    }).catch(() => {});
+    setAiInitialMsg(`请帮我讲解这道题目：\n\n${text}`);
+    setAiModalOpen(true);
   }, [question]);
 
   // Timer
@@ -199,7 +193,11 @@ const QuizView: React.FC<{ onBack: () => void; mode: string }> = ({ onBack, mode
 
       <Card
         title={<div style={{ whiteSpace: 'pre-wrap', fontSize: 16, lineHeight: 1.8 }}>{question.content}</div>}
-        onCopy={handleQuestionCopy}
+        extra={
+          <Button type="default" icon={<RobotOutlined />} size="small" onClick={handleAskAI}>
+            AI 讲解
+          </Button>
+        }
       >
         {question.code_snippet && (
           <pre className="code-block">
