@@ -23,7 +23,10 @@
 │       ├── stores/            # useAppStore, usePracticeStore (zustand)
 │       └── types/             # index.ts (所有 TS 类型定义)
 ├── backend/                   # FastAPI 后端 (port 8000)
-│   ├── run.py                 # 启动入口: python run.py
+│   ├── run.py                 # 开发启动入口 (reload=True)
+│   ├── run_prod.py            # 生产启动入口 (Render, 读取 $PORT)
+│   ├── .env                   # 开发环境变量 (DEEPSEEK_API_KEY等)
+│   ├── .env.prod              # 生产环境变量模板
 │   ├── app/
 │   │   ├── main.py            # FastAPI app, CORS, lifespan, 路由注册
 │   │   ├── config.py          # pydantic Settings (从 .env 读取)
@@ -33,11 +36,12 @@
 │   │   ├── schemas/           # Pydantic schema (common, knowledge, question)
 │   │   ├── services/          # ai_service, knowledge_service, question_service, ocr_service
 │   │   └── ai_providers/      # base, deepseek_provider
-│   └── seed/                  # seed_knowledge.py, seed_questions.py, seed_ds_markdown_full.py 等
+│   └── seed/                  # seed_all.py (自动种子), seed_knowledge.py, seed_questions.py, seed_ds_markdown_full.py 等
 ├── data/                      # knowledge.db (SQLite), uploads/
 ├── scripts/                   # 工具脚本: dedup_questions.py, import_documents.py, ocr_and_import_questions.py 等
 ├── screenshots/               # Playwright 页面截图
 ├── 二工大804资料包/            # 原始备考资料（43个文件，~261MB，含真题/题库/教材/笔记）
+├── render.yaml                # Render.com 部署配置
 ├── .mcp.json                  # Tavily + PaddleOCR MCP 配置
 ├── .claude/skills/            # api-debug, seed-questions, tavily-search, ocr, frontend-design, playwright-cli
 └── CLAUDE.md
@@ -116,7 +120,7 @@ npx @playwright/cli screenshot --filename=screenshots/page.png
 - **错题复习迁移**: "复习错题"按钮已从刷题练习配置页迁移到错题记录页，点击后通过 zustand 注入错题列表并跳转到 `Practice` 页面直接开始做题
 - **按章节浏览题目**: Practice 页面新增"按章节浏览"视图 — 两级 Tabs（科目 → 章节），章节标签显示完整描述性名称（如"1.1 程序基本结构与数据类型"）和题目数 Badge，支持单题练习和全章练习。后端 `GET /api/questions/chapters` 端点返回章节统计，题目接口支持 `chapter` 参数过滤。
 - **AI Provider**: 仅使用 DeepSeek V4，`ai_providers/deepseek_provider.py`
-- **CORS**: 仅允许 localhost:5173 和 localhost:3000
+- **CORS**: 开发模式允许 localhost:5173/3000 等 4 个源；生产模式 (ENABLE_CORS=false) 禁用 CORS 中间件，前后端同源
 - **OCR**: 双轨并行 — MCP 层 PaddleOCR (uvx 即席识别，中文 96-98%)，后端 EasyOCR (批量文档入库，自动检测扫描件)
 - **文档上传**: 支持 pdf/docx/md/txt/png/jpg/jpeg，PDF 自动检测文本型/扫描型，扫描件和图片走 OCR 提取文字
 - **文档编码**: txt/md 文件自动检测编码（UTF-8 → GBK → replace 三级回退），避免中文乱码
@@ -138,6 +142,57 @@ npx @playwright/cli screenshot --filename=screenshots/page.png
   - 配置项: ENABLE_FEW_SHOT (默认true), MAX_FEW_SHOT_EXAMPLES (默认3)
 - **DeepSeek V4**: API Key 已配置在 .env 中
 
+## Render 部署
+
+项目已部署到 [Render.com](https://render.com)，使用免费套餐，服务名 `kaoyan-804`。
+
+### 部署架构
+
+| 配置项 | 值 |
+|--------|-----|
+| 运行时 | Python (原生，非 Docker) |
+| 套餐 | free |
+| 构建命令 | `pip install -r backend/requirements.txt` + `cd frontend && npm ci && npm run build` |
+| 启动命令 | `cd backend && python run_prod.py` |
+| 端口 | `$PORT` 环境变量（Render 自动分配，run_prod.py 读取） |
+| 持久化磁盘 | 1GB，挂载于 `/data`（存放 SQLite 数据库和上传文件） |
+
+### 生产模式 vs 开发模式
+
+| 行为 | 开发 (`run.py`) | 生产 (`run_prod.py`) |
+|------|-----------------|---------------------|
+| 热重载 | reload=True | reload=False |
+| workers | 默认 | 1 |
+| 端口 | 固定 8000 | 读取 `$PORT` 环境变量 |
+| CORS | 启用（4个本地源） | 禁用（前后端同源） |
+| 前端服务 | Vite dev server (:5173) | FastAPI 直接 serve `frontend/dist/` |
+| 首次启动 | 手动种子 | 自动种子 (`seed_all.py`) |
+
+### 生产模式关键行为
+
+- **前后端同源**: FastAPI 在 `main.py` 中检测 `frontend/dist/` 目录，若存在则挂载 `/assets` 静态文件，并对所有非 API 路由回退到 `index.html`（SPA 路由支持）
+- **API 相对路径**: 前端 `api.ts` 中 `baseURL: '/api'` 为相对路径，开发时由 Vite 代理转发，生产时自然同源，无需配置
+- **CORS 跳过**: `ENABLE_CORS=false` 时，CORSMiddleware 不会被添加，节省资源
+- **数据库自动初始化**: `lifespan` 中调用 `seed_all()` 自动建表和种子数据，首次部署无需手动操作
+- **数据持久化**: Render Disk 挂载 `/data` ← `DATA_DIR` 配置 → `data/knowledge.db` + `data/uploads/`，重启不丢数据
+- **依赖精简**: `requirements.txt` 不含 EasyOCR 等重依赖（避免 Render 构建超时），OCR 通过 MCP 层 PaddleOCR 即席处理
+
+### 环境变量
+
+| 变量 | 开发 (.env) | 生产 (Render Dashboard) |
+|------|------------|------------------------|
+| `DEEPSEEK_API_KEY` | 已配置 | 在 Render Dashboard 设置 |
+| `ENABLE_CORS` | true (默认) | false |
+| `DATA_DIR` | `../data` (项目相对路径) | `/data` (Render Disk 挂载点) |
+| `PORT` | 不设置 | Render 自动注入 |
+
+### 部署更新
+
+```bash
+# Render 自动监听 git push 并重新构建。如需手动触发：
+# 在 Render Dashboard → kaoyan-804 → Manual Deploy → Deploy latest commit
+```
+
 ## Skills
 
 项目 `.claude/skills/` 目录下已安装：
@@ -150,6 +205,7 @@ npx @playwright/cli screenshot --filename=screenshots/page.png
 | `ocr` | 从图片/扫描PDF中提取中文文本 |
 | `frontend-design` | 前端 UI 设计与美化，生成高质量界面代码 |
 | `playwright-cli` | 浏览器自动化测试，页面截图验证 |
+| `shadcn-ui` | shadcn/ui 组件库，Tailwind + Radix 高质量可定制组件 |
 
 ## 804 考试信息
 

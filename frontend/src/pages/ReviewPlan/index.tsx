@@ -65,14 +65,14 @@ const ReviewPlan: React.FC = () => {
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col span={6}><Card><Statistic title="知识点总数" value={stats.total_knowledge_points} prefix={<BookOutlined />} /></Card></Col>
         <Col span={6}><Card><Statistic title="平均掌握度" value={`${stats.average_mastery}%`} /></Card></Col>
-        <Col span={6}><Card><Statistic title="今日待复习" value={stats.due_now} styles={{ content: { color: stats.due_now > 0 ? '#C56C6C' : '#3D8B5E' } }} /></Card></Col>
+        <Col span={6}><Card><Statistic title="今日待复习" value={stats.due_now} styles={{ content: { color: stats.due_now > 0 ? '#EF4444' : '#10B981' } }} /></Card></Col>
         <Col span={6}><Card><Statistic title="本周待复习" value={stats.due_this_week} /></Card></Col>
       </Row>
 
       <Card title={<span><ScheduleOutlined /> 待复习知识点</span>}
         extra={<Button onClick={fetchData} loading={loading}>刷新</Button>}>
         {items.length === 0 ? (
-          <Result icon={<CheckCircleOutlined style={{ color: '#3D8B5E' }} />}
+          <Result icon={<CheckCircleOutlined style={{ color: '#10B981' }} />}
             title="暂无到期复习任务"
             subTitle="你已掌握所有知识点，继续保持！" />
         ) : (
@@ -83,7 +83,7 @@ const ReviewPlan: React.FC = () => {
                 key={item.mastery_id}
                 extra={
                   <Space orientation="vertical">
-                    <div style={{ fontSize: 12, color: '#9B9590' }}>
+                    <div style={{ fontSize: 12, color: '#94A3B8' }}>
                       间隔: {item.interval_days}天 | 重复: {item.repetitions}次
                     </div>
                     <Rate
@@ -92,7 +92,7 @@ const ReviewPlan: React.FC = () => {
                       onChange={(val) => handleReview(item.mastery_id, val)}
                       disabled={reviewing === item.mastery_id}
                     />
-                    <span style={{ fontSize: 11, color: '#9B9590' }}>
+                    <span style={{ fontSize: 11, color: '#94A3B8' }}>
                       评分: 1=遗忘 3=基本记住 5=轻松掌握
                     </span>
                   </Space>
@@ -112,7 +112,7 @@ const ReviewPlan: React.FC = () => {
                     <div>
                       <Progress percent={item.mastery_level} size="small" />
                       {item.sample_question && (
-                        <p style={{ marginTop: 5, color: '#6B6560', fontSize: 13 }}>
+                        <p style={{ marginTop: 5, color: '#64748B', fontSize: 13 }}>
                           示例题: {item.sample_question.content}
                         </p>
                       )}

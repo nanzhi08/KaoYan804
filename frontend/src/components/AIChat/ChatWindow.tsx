@@ -223,14 +223,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ knowledgePoint, provider, initi
   return (
     <>
       <style>{`
-        .msg-row { display: flex; gap: 12px; margin-bottom: 16px; }
-        .msg-bubble { padding: 12px 16px; border-radius: 10px; overflow: hidden; }
-        .msg-bubble-user { background: #F0F1FC; }
-        .msg-bubble-assistant { background: #F9F8F5; }
-        .msg-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex;
-          align-items: center; justify-content: center; color: #fff; flex-shrink: 0; font-size: 14px; }
-        .msg-avatar-user { background: #4A5BC9; }
-        .msg-avatar-assistant { background: #3D8B5E; }
+        .msg-row { display: flex; gap: 12px; margin-bottom: 20px; }
+        .msg-bubble { padding: 14px 18px; border-radius: 14px; overflow: hidden; line-height: 1.7; }
+        .msg-bubble-user { background: linear-gradient(135deg, #6366F1, #818CF8); color: #fff; }
+        .msg-bubble-assistant { background: #F8FAFC; border: 1px solid #E2E8F0; }
+        .msg-avatar { width: 38px; height: 38px; border-radius: 12px; display: flex;
+          align-items: center; justify-content: center; color: #fff; flex-shrink: 0; font-size: 15px; }
+        .msg-avatar-user { background: linear-gradient(135deg, #6366F1, #818CF8); }
+        .msg-avatar-assistant { background: linear-gradient(135deg, #10B981, #34D399); }
         .msg-feedback-area { opacity: 0; transition: opacity 0.25s ease; }
         .msg-row:hover .msg-feedback-area { opacity: 1; }
       `}</style>
@@ -249,7 +249,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ knowledgePoint, provider, initi
           )}
           {loading && (
             <div style={{ textAlign: 'center', margin: 8 }}>
-              <Spin size="small" /><span style={{ marginLeft: 8, color: '#9B9590' }}>AI思考中...</span>
+              <Spin size="small" /><span style={{ marginLeft: 8, color: '#94A3B8' }}>AI思考中...</span>
             </div>
           )}
           <div ref={messagesEndRef} />

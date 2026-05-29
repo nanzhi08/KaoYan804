@@ -59,7 +59,7 @@ const MockExam: React.FC = () => {
     return (
       <Card title={<span><FormOutlined /> 模拟考试</span>}>
         <Result
-          icon={<FormOutlined style={{ color: '#4A5BC9' }} />}
+          icon={<FormOutlined style={{ color: '#6366F1' }} />}
           title="804 全真模拟考试"
           subTitle="按真题比例自动组卷：DS 80分 + C语言 70分 = 150分，限时3小时"
           extra={

@@ -10,9 +10,9 @@ import { useAppStore } from '../../stores/useAppStore';
 import type { KnowledgePoint } from '../../types';
 
 const partColors: Record<string, string> = {
-  C_programming: '#4A5BC9',
-  data_structure: '#3D8B5E',
-  root: '#D4953A',
+  C_programming: '#6366F1',
+  data_structure: '#10B981',
+  root: '#F59E0B',
 };
 
 const markdownComponents = {
@@ -53,7 +53,7 @@ const KnowledgeMap: React.FC = () => {
     nodes.map((node) => ({
       title: (
         <span>
-          <Tag color={partColors[node.part] || '#9B9590'} style={{ marginRight: 8 }}>
+          <Tag color={partColors[node.part] || '#94A3B8'} style={{ marginRight: 8 }}>
             {node.chapter || node.part}
           </Tag>
           {node.name}
@@ -232,7 +232,7 @@ const KnowledgeMap: React.FC = () => {
                     <span>
                       <span style={{
                         display: 'inline-block', width: 8, height: 8, borderRadius: '50%',
-                        background: '#3D8B5E', marginRight: 8, verticalAlign: 'middle'
+                        background: '#10B981', marginRight: 8, verticalAlign: 'middle'
                       }} />
                       AI 讲解（已缓存）
                     </span>
@@ -243,14 +243,14 @@ const KnowledgeMap: React.FC = () => {
                     </Button>
                   }
                   hoverable
-                  style={{ cursor: 'pointer', borderColor: '#E8E3DC' }}
+                  style={{ cursor: 'pointer', borderColor: '#E2E8F0' }}
                   styles={{
                     body: { padding: '12px 16px' }
                   }}
                 >
                   <div style={{
                     maxHeight: 100, overflow: 'hidden', position: 'relative',
-                    fontSize: 13, lineHeight: 1.7, color: '#6B6560',
+                    fontSize: 13, lineHeight: 1.7, color: '#64748B',
                   }}>
                     <ReactMarkdown components={markdownComponents}>
                       {selectedKnowledgePoint.ai_explanation.slice(0, 300) + '...'}
@@ -288,9 +288,9 @@ const KnowledgeMap: React.FC = () => {
       <Modal
         title={
           <span style={{ fontSize: 16, fontWeight: 600 }}>
-            <RobotOutlined style={{ marginRight: 8, color: '#4A5BC9' }} />
+            <RobotOutlined style={{ marginRight: 8, color: '#6366F1' }} />
             AI 讲解
-            <span style={{ fontSize: 13, fontWeight: 400, color: '#9B9590', marginLeft: 12 }}>
+            <span style={{ fontSize: 13, fontWeight: 400, color: '#94A3B8', marginLeft: 12 }}>
               {selectedKnowledgePoint?.name}
             </span>
           </span>
@@ -307,7 +307,7 @@ const KnowledgeMap: React.FC = () => {
             fontSize: 15,
             lineHeight: 1.9,
             padding: '20px 28px',
-            color: '#2C2C2C',
+            color: '#0F172A',
           },
         }}
       >

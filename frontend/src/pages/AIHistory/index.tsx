@@ -77,7 +77,7 @@ const AIHistory: React.FC = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                   <span style={{ fontWeight: 500 }}>{conv.title || '新对话'}</span>
                   <span style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <span style={{ display: 'flex', gap: 12, color: '#8C8882', fontSize: 12 }}>
+                    <span style={{ display: 'flex', gap: 12, color: '#94A3B8', fontSize: 12 }}>
                       <Tag color="blue">{conv.message_count} 条消息</Tag>
                       <span><ClockCircleOutlined /> {formatTime(conv.updated_at)}</span>
                     </span>
@@ -108,13 +108,13 @@ const AIHistory: React.FC = () => {
                           width: 32, height: 32, borderRadius: '50%', display: 'flex',
                           alignItems: 'center', justifyContent: 'center', color: '#fff',
                           flexShrink: 0, fontSize: 13,
-                          background: msg.role === 'user' ? '#4A5BC9' : '#3D8B5E',
+                          background: msg.role === 'user' ? '#6366F1' : '#10B981',
                         }}>
                           {msg.role === 'user' ? <UserOutlined /> : <RobotOutlined />}
                         </div>
                         <div style={{
                           flex: 1, padding: '10px 14px', borderRadius: 10,
-                          background: msg.role === 'user' ? '#F0F1FC' : '#F9F8F5',
+                          background: msg.role === 'user' ? '#F5F3FF' : '#F8FAFC',
                           overflow: 'hidden',
                         }}>
                           {msg.role === 'assistant' ? (

@@ -243,7 +243,7 @@ const WrongRecords: React.FC = () => {
               </Descriptions.Item>
               {selectedQuestion.code_snippet && (
                 <Descriptions.Item label="代码片段">
-                  <pre style={{ margin: 0, background: '#FAF7F2', padding: 12, borderRadius: 8, overflow: 'auto' }}>
+                  <pre style={{ margin: 0, background: '#F8FAFC', padding: 12, borderRadius: 8, overflow: 'auto' }}>
                     <code>{selectedQuestion.code_snippet}</code>
                   </pre>
                 </Descriptions.Item>

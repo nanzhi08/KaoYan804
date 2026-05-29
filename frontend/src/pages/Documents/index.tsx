@@ -5,10 +5,10 @@ import { fetchDocuments, uploadDocument, deleteDocument } from '../../services/d
 import type { Document as DocType } from '../../types';
 
 const fileTypeColors: Record<string, string> = {
-  pdf: '#C56C6C',
-  docx: '#4A5BC9',
-  txt: '#3D8B5E',
-  md: '#4A5BC9',
+  pdf: '#EF4444',
+  docx: '#6366F1',
+  txt: '#10B981',
+  md: '#6366F1',
 };
 
 const Documents: React.FC = () => {
@@ -72,13 +72,13 @@ const Documents: React.FC = () => {
               ]}
             >
               <List.Item.Meta
-                avatar={<FileTextOutlined style={{ fontSize: 24, color: fileTypeColors[doc.file_type] || '#9B9590' }} />}
+                avatar={<FileTextOutlined style={{ fontSize: 24, color: fileTypeColors[doc.file_type] || '#94A3B8' }} />}
                 title={doc.original_name}
                 description={
                   <span>
                     <Tag color={fileTypeColors[doc.file_type]}>{doc.file_type.toUpperCase()}</Tag>
                     {doc.tags?.map((tag: string) => <Tag key={tag}>{tag}</Tag>)}
-                    <span style={{ color: '#9B9590', marginLeft: 8 }}>
+                    <span style={{ color: '#94A3B8', marginLeft: 8 }}>
                       {new Date(doc.uploaded_at).toLocaleDateString('zh-CN')}
                     </span>
                   </span>

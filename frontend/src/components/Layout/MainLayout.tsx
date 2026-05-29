@@ -97,7 +97,7 @@ const MainLayout: React.FC = () => {
         <Sider
           width={SIDEBAR_WIDTH}
           style={{
-            background: '#2A2D35',
+            background: '#0F172A',
             overflow: 'auto',
             height: '100vh',
             position: 'fixed',
@@ -114,13 +114,15 @@ const MainLayout: React.FC = () => {
             alignItems: 'center',
             justifyContent: 'center',
             gap: 8,
-            color: '#fff',
-            fontSize: 17,
-            fontFamily: "'LXGW WenKai', 'KaiTi', serif",
-            letterSpacing: 2,
-            borderBottom: '1px solid rgba(255,255,255,0.08)',
+            color: '#E2E8F0',
+            fontSize: 16,
+            fontWeight: 600,
+            fontFamily: "'Noto Sans SC', sans-serif",
+            letterSpacing: 1,
+            background: 'linear-gradient(180deg, rgba(99,102,241,0.08) 0%, transparent 100%)',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
           }}>
-            考研804知识库
+            <span style={{ fontSize: 20 }}>📚</span> 考研804知识库
           </div>
           <SidebarMenu />
         </Sider>
@@ -134,10 +136,10 @@ const MainLayout: React.FC = () => {
           open={mobileDrawerOpen}
           onClose={() => setMobileDrawerOpen(false)}
           styles={{
-            body: { padding: 0, background: '#2A2D35' },
-            header: { background: '#2A2D35', borderBottom: '1px solid rgba(255,255,255,0.08)' },
+            body: { padding: 0, background: '#0F172A' },
+            header: { background: '#0F172A', borderBottom: '1px solid rgba(255,255,255,0.06)' },
           }}
-          title={<span style={{ color: '#fff', fontFamily: "'LXGW WenKai', 'KaiTi', serif", fontSize: 16 }}>考研804知识库</span>}
+          title={<span style={{ color: '#E2E8F0', fontFamily: "'Noto Sans SC', sans-serif", fontSize: 16, fontWeight: 600 }}>考研804知识库</span>}
           closeIcon={<span style={{ color: '#fff' }}>✕</span>}
         >
           <SidebarMenu onItemClick={() => setMobileDrawerOpen(false)} />
@@ -147,29 +149,29 @@ const MainLayout: React.FC = () => {
       {/* Main Content Area */}
       <Layout style={{ marginLeft: isMobile ? 0 : SIDEBAR_WIDTH }}>
         <Header style={{
-          background: 'rgba(255,255,255,0.85)',
-          backdropFilter: 'blur(12px)',
+          background: 'rgba(248,250,252,0.8)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
           padding: isMobile ? '0 12px' : '0 28px',
-          boxShadow: '0 1px 8px rgba(0,0,0,0.04)',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
           display: 'flex',
           alignItems: 'center',
           gap: 12,
-          fontSize: isMobile ? 13 : 15,
+          fontSize: isMobile ? 13 : 14,
           fontWeight: 500,
-          color: '#2C2C2C',
-          letterSpacing: 1,
+          color: '#0F172A',
           position: 'sticky',
           top: 0,
           zIndex: 9,
-          height: 56,
-          borderBottom: '1px solid #F0ECE5',
+          height: 52,
+          borderBottom: '1px solid #E2E8F0',
         }}>
           {isMobile && (
             <Button
               type="text"
               icon={<MenuOutlined />}
               onClick={() => setMobileDrawerOpen(true)}
-              style={{ color: '#2C2C2C', fontSize: 18 }}
+              style={{ color: '#0F172A', fontSize: 18 }}
             />
           )}
           <span style={{ flex: 1 }}>

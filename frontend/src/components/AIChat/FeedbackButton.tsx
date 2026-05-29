@@ -75,7 +75,7 @@ const FeedbackButton: React.FC<Props> = ({ messageId, conversationId, messageInd
         .feedback-divider {
           flex: 1;
           height: 0;
-          border-top: 1px dotted #D4CFC6;
+          border-top: 1px dotted #E2E8F0;
           margin-right: 8px;
           transition: border-color 0.3s ease;
         }
@@ -88,7 +88,7 @@ const FeedbackButton: React.FC<Props> = ({ messageId, conversationId, messageInd
           border: none;
           border-radius: 50%;
           background: transparent;
-          color: #B5B0A8;
+          color: #94A3B8;
           cursor: pointer;
           font-size: 13px;
           transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -96,27 +96,27 @@ const FeedbackButton: React.FC<Props> = ({ messageId, conversationId, messageInd
           position: relative;
         }
         .feedback-btn:hover {
-          color: #7A7368;
+          color: #64748B;
           background: rgba(0, 0, 0, 0.04);
         }
         .feedback-btn:active {
           transform: scale(0.88);
         }
         .feedback-btn.active.like {
-          color: #3D8B5E;
-          background: rgba(61, 139, 94, 0.08);
-          box-shadow: 0 0 0 1px rgba(61, 139, 94, 0.15);
+          color: #10B981;
+          background: rgba(16, 185, 129, 0.1);
+          box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2);
         }
         .feedback-btn.active.like:hover {
-          background: rgba(61, 139, 94, 0.14);
+          background: rgba(16, 185, 129, 0.16);
         }
         .feedback-btn.active.dislike {
-          color: #C56C6C;
-          background: rgba(197, 108, 108, 0.08);
-          box-shadow: 0 0 0 1px rgba(197, 108, 108, 0.15);
+          color: #EF4444;
+          background: rgba(239, 68, 68, 0.1);
+          box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2);
         }
         .feedback-btn.active.dislike:hover {
-          background: rgba(197, 108, 108, 0.14);
+          background: rgba(239, 68, 68, 0.16);
         }
         .feedback-btn.pop {
           animation: feedbackPop 0.45s cubic-bezier(0.4, 0, 0.2, 1);

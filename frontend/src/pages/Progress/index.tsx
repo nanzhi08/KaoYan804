@@ -12,14 +12,14 @@ import {
 } from 'recharts';
 
 const partColors: Record<string, string> = {
-  C_programming: '#4A5BC9',
-  data_structure: '#3D8B5E',
+  C_programming: '#6366F1',
+  data_structure: '#10B981',
 };
 
 const examWeightColors: Record<string, string> = {
-  '高频': '#C56C6C',
-  '中频': '#D4953A',
-  '低频': '#4A5BC9',
+  '高频': '#EF4444',
+  '中频': '#F59E0B',
+  '低频': '#6366F1',
 };
 
 type ChapterRadarDatum = {
@@ -32,7 +32,7 @@ type ChapterRadarDatum = {
 };
 
 const getMasteryColor = (value: number) => (
-  value >= 70 ? '#3D8B5E' : value >= 40 ? '#D4953A' : '#C56C6C'
+  value >= 70 ? '#10B981' : value >= 40 ? '#F59E0B' : '#EF4444'
 );
 
 const getMasteryLabel = (value: number) => (
@@ -117,7 +117,7 @@ const SubjectRadarCard: React.FC<{
             </Col>
             <Col span={8}>
               <Card size="small">
-                <div style={{ color: '#666', fontSize: 12, marginBottom: 6 }}>当前最弱章节</div>
+                <div style={{ color: '#64748B', fontSize: 12, marginBottom: 6 }}>当前最弱章节</div>
                 <div style={{ fontWeight: 600, marginBottom: 4 }}>{weakest?.chapter || '-'}</div>
                 <Tag color={getMasteryColor(weakest?.mastery ?? 0)}>
                   {weakest?.mastery ?? 0}% · {getMasteryLabel(weakest?.mastery ?? 0)}
@@ -162,7 +162,7 @@ const SubjectRadarCard: React.FC<{
                   <div key={item.chapter}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                       <span>{item.chapter}</span>
-                      <span style={{ color: '#666' }}>
+                      <span style={{ color: '#64748B' }}>
                         {item.mastery}% · {item.pointCount} 个知识点 · {item.totalAttempts} 次练习
                       </span>
                     </div>
@@ -235,7 +235,7 @@ const ProgressPage: React.FC = () => {
       render: (v: number) => (
         <Progress
           percent={v} size="small"
-          strokeColor={v >= 70 ? '#52c41a' : v >= 40 ? '#faad14' : '#ff4d4f'}
+          strokeColor={v >= 70 ? '#10B981' : v >= 40 ? '#F59E0B' : '#EF4444'}
           format={() => `${v}%`}
         />
       ),
@@ -271,7 +271,7 @@ const ProgressPage: React.FC = () => {
               precision={1}
               prefix={<TrophyOutlined />}
               suffix="%"
-              styles={{ content: { color: overview.accuracy >= 60 ? '#52c41a' : '#ff4d4f' } }}
+              styles={{ content: { color: overview.accuracy >= 60 ? '#10B981' : '#EF4444' } }}
             />
           </Card>
         </Col>
@@ -283,7 +283,7 @@ const ProgressPage: React.FC = () => {
               precision={1}
               prefix={<CodeOutlined />}
               suffix="%"
-              styles={{ content: { color: overview.c_accuracy >= 60 ? '#1890ff' : '#ff4d4f' } }}
+              styles={{ content: { color: overview.c_accuracy >= 60 ? '#6366F1' : '#EF4444' } }}
             />
           </Card>
         </Col>
@@ -295,7 +295,7 @@ const ProgressPage: React.FC = () => {
               precision={1}
               prefix={<RadarChartOutlined />}
               suffix="%"
-              styles={{ content: { color: overview.ds_accuracy >= 60 ? '#52c41a' : '#ff4d4f' } }}
+              styles={{ content: { color: overview.ds_accuracy >= 60 ? '#10B981' : '#EF4444' } }}
             />
           </Card>
         </Col>
@@ -320,10 +320,10 @@ const ProgressPage: React.FC = () => {
               </Col>
             </Row>
             <div style={{ marginTop: 16 }}>
-              <div style={{ marginBottom: 4, color: '#666' }}>平均掌握度</div>
+              <div style={{ marginBottom: 4, color: '#64748B' }}>平均掌握度</div>
               <Progress
                 percent={cAvgMastery}
-                strokeColor="#1890ff"
+                strokeColor="#6366F1"
                 format={() => `${cAvgMastery}%`}
               />
             </div>
@@ -346,10 +346,10 @@ const ProgressPage: React.FC = () => {
               </Col>
             </Row>
             <div style={{ marginTop: 16 }}>
-              <div style={{ marginBottom: 4, color: '#666' }}>平均掌握度</div>
+              <div style={{ marginBottom: 4, color: '#64748B' }}>平均掌握度</div>
               <Progress
                 percent={dsAvgMastery}
-                strokeColor="#52c41a"
+                strokeColor="#10B981"
                 format={() => `${dsAvgMastery}%`}
               />
             </div>

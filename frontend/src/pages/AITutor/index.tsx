@@ -27,7 +27,7 @@ const AITutor: React.FC = () => {
             <RobotOutlined style={{ marginRight: 8 }} />
             AI 导师
             {knowledgePoint && (
-              <span style={{ fontSize: 14, color: '#666', marginLeft: 12 }}>
+              <span style={{ fontSize: 14, color: '#64748B', marginLeft: 12 }}>
                 正在讲解：{knowledgePoint.name}
               </span>
             )}

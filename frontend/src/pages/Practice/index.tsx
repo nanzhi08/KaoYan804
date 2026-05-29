@@ -70,9 +70,9 @@ const PracticeConfig: React.FC<{
       {stats && (
         <Row gutter={12} style={{ marginBottom: 16 }}>
           <Col span={6}><Statistic title="总练习" value={stats.total} /></Col>
-          <Col span={6}><Statistic title="正确率" value={stats.accuracy} suffix="%" styles={{ content: { color: stats.accuracy >= 60 ? '#3D8B5E' : '#C56C6C' } }} /></Col>
+          <Col span={6}><Statistic title="正确率" value={stats.accuracy} suffix="%" styles={{ content: { color: stats.accuracy >= 60 ? '#10B981' : '#EF4444' } }} /></Col>
           <Col span={6}><Statistic title="今日" value={stats.today} /></Col>
-          <Col span={6}><Statistic title="错题" value={stats.wrong} styles={{ content: { color: stats.wrong > 0 ? '#C56C6C' : '#3D8B5E' } }} /></Col>
+          <Col span={6}><Statistic title="错题" value={stats.wrong} styles={{ content: { color: stats.wrong > 0 ? '#EF4444' : '#10B981' } }} /></Col>
         </Row>
       )}
 
@@ -212,9 +212,9 @@ const QuizView: React.FC<{ onBack: () => void; mode: string }> = ({ onBack, mode
               <Space orientation="vertical" style={{ width: '100%' }}>
                 {Object.entries(question.options).map(([key, val]) => (
                   <Radio key={key} value={key} style={{
-                    padding: '12px 16px', border: '1px solid #d9d9d9', borderRadius: 8, width: '100%',
-                    background: currentResult && key === question.answer ? '#ECF5EF' :
-                      currentResult && key === answers[question.id] && key !== question.answer ? '#FDF0F0' : undefined,
+                    padding: '12px 16px', border: '1px solid #E2E8F0', borderRadius: 8, width: '100%',
+                    background: currentResult && key === question.answer ? '#ECFDF5' :
+                      currentResult && key === answers[question.id] && key !== question.answer ? '#FEF2F2' : undefined,
                   }}><strong>{key}.</strong> {val}</Radio>
                 ))}
               </Space>
@@ -226,7 +226,7 @@ const QuizView: React.FC<{ onBack: () => void; mode: string }> = ({ onBack, mode
               disabled={!!currentResult} style={{ width: '100%' }}>
               <Space orientation="vertical" style={{ width: '100%' }}>
                 {Object.entries(question.options).map(([key, val]) => (
-                  <Checkbox key={key} value={key} style={{ padding: '12px 16px', border: '1px solid #d9d9d9', borderRadius: 8, width: '100%' }}>
+                  <Checkbox key={key} value={key} style={{ padding: '12px 16px', border: '1px solid #E2E8F0', borderRadius: 8, width: '100%' }}>
                     <strong>{key}.</strong> {val}
                   </Checkbox>
                 ))}
@@ -257,7 +257,7 @@ const QuizView: React.FC<{ onBack: () => void; mode: string }> = ({ onBack, mode
               title={currentResult.is_correct ? '回答正确！' : '回答错误'}
               subTitle={<div><Tag color={currentResult.is_correct ? 'green' : 'red'}>正确答案</Tag>{currentResult.correct_answer}</div>} />
             {currentResult.explanation && (
-              <Card size="small" title="解析" style={{ marginTop: 8, background: '#FAF7F2' }}>{currentResult.explanation}</Card>
+              <Card size="small" title="解析" style={{ marginTop: 8, background: '#F8FAFC' }}>{currentResult.explanation}</Card>
             )}
           </div>
         )}
@@ -340,8 +340,8 @@ const partLabel: Record<string, string> = {
   data_structure: '数据结构',
 };
 const partColor: Record<string, string> = {
-  C_programming: '#4A5BC9',
-  data_structure: '#3D8B5E',
+  C_programming: '#6366F1',
+  data_structure: '#10B981',
 };
 
 const ChapterBrowse: React.FC<{
