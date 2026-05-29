@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Spin, Empty, Tag, Collapse, List, Typography } from 'antd';
-import { HistoryOutlined, RobotOutlined, UserOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { Card, Spin, Empty, Tag, Collapse, List, Typography, Button, Popconfirm, message } from 'antd';
+import { HistoryOutlined, RobotOutlined, UserOutlined, ClockCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
 import api from '../../services/api';
 import type { Message } from '../../types';
@@ -40,6 +40,17 @@ const AIHistory: React.FC = () => {
     }
   };
 
+  const handleDelete = async (convId: number) => {
+    try {
+      await api.delete(`/ai/conversations/${convId}`);
+      setConversations(prev => prev.filter(c => c.id !== convId));
+      setDetails(prev => { const n = { ...prev }; delete n[convId]; return n; });
+      message.success('已删除');
+    } catch {
+      message.error('删除失败');
+    }
+  };
+
   const formatTime = (t: string) => t?.replace('T', ' ').substring(0, 19) || '';
 
   if (loading) return <Spin size="large" style={{ display: 'block', margin: '100px auto' }} />;
@@ -65,9 +76,23 @@ const AIHistory: React.FC = () => {
               label: (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                   <span style={{ fontWeight: 500 }}>{conv.title || '新对话'}</span>
-                  <span style={{ display: 'flex', gap: 12, color: '#8C8882', fontSize: 12 }}>
-                    <Tag color="blue">{conv.message_count} 条消息</Tag>
-                    <span><ClockCircleOutlined /> {formatTime(conv.updated_at)}</span>
+                  <span style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                    <span style={{ display: 'flex', gap: 12, color: '#8C8882', fontSize: 12 }}>
+                      <Tag color="blue">{conv.message_count} 条消息</Tag>
+                      <span><ClockCircleOutlined /> {formatTime(conv.updated_at)}</span>
+                    </span>
+                    <Popconfirm
+                      title="确定删除这条对话记录？"
+                      onConfirm={(e) => { e?.stopPropagation(); handleDelete(conv.id); }}
+                      onCancel={(e) => e?.stopPropagation()}
+                      okText="删除" cancelText="取消"
+                    >
+                      <Button
+                        type="text" danger size="small"
+                        icon={<DeleteOutlined />}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </Popconfirm>
                   </span>
                 </div>
               ),

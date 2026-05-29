@@ -289,7 +289,8 @@ const QuizView: React.FC<{ onBack: () => void; mode: string }> = ({ onBack, mode
         title={<span><RobotOutlined style={{ marginRight: 8 }} />AI 导师</span>}
         open={aiModalOpen}
         onCancel={() => setAiModalOpen(false)}
-        width={680}
+        width={900}
+        style={{ top: 20 }}
         footer={null}
         destroyOnClose={false}
       >
