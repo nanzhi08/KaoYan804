@@ -17,6 +17,14 @@ FRONTEND_DIR = Path(__file__).parent.parent.parent / "frontend" / "dist"
 async def lifespan(app: FastAPI):
     await init_db()
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+
+    # Auto-seed on first startup (safe to call - skips if data exists)
+    try:
+        from seed.seed_all import seed_all
+        await seed_all()
+    except Exception as e:
+        print(f"[Seed] Skipping auto-seed: {e}")
+
     yield
 
 
