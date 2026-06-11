@@ -24,12 +24,33 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    emptyOutDir: true,
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: 'react-vendor',
+              test: /node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler|zustand)[\\/]/,
+              priority: 30,
+            },
+            {
+              name: 'markdown-vendor',
+              test: /node_modules[\\/](react-markdown|remark-.+|rehype-.+|micromark|mdast-.+|hast-.+|unified)[\\/]/,
+              priority: 10,
+            },
+          ],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     host: '0.0.0.0',  // allow LAN access from mobile
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://127.0.0.1:8000',
         changeOrigin: true,
       },
     },

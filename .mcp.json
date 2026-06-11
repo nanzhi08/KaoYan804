@@ -3,10 +3,7 @@
     "tavily": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "tavily-mcp@latest"],
-      "env": {
-        "TAVILY_API_KEY": "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"
-      }
+      "args": ["-y", "tavily-mcp@latest"]
     },
     "paddleocr": {
       "type": "stdio",
@@ -17,6 +14,18 @@
         "PADDLEOCR_MCP_PPOCR_SOURCE": "local",
         "PADDLEOCR_MCP_DEVICE": "cpu",
         "PADDLEOCR_MCP_TIMEOUT": "120"
+      }
+    },
+    "git": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "mcp-server-git",
+        "--repository",
+        "C:\\Users\\zhangsihai\\Desktop\\考研知识库系统"
+      ],
+      "env": {
+        "GIT_PYTHON_GIT_EXECUTABLE": "D:\\Program Files\\Git\\cmd\\git.exe"
       }
     }
   }

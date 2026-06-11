@@ -10,6 +10,7 @@ from collections import defaultdict
 from sqlalchemy import select, delete as sa_delete
 from app.database import async_session, init_db
 from app.models.question import Question, QuestionKnowledgePoint
+from scripts.import_report import ImportReport, write_report
 
 
 def normalize_content(text: str) -> str:
@@ -32,6 +33,7 @@ def content_hash(text: str) -> str:
 
 async def find_duplicates(dry_run: bool = True):
     await init_db()
+    report = ImportReport(script="dedup_questions.py", dry_run=dry_run)
 
     async with async_session() as db:
         result = await db.execute(select(Question).order_by(Question.id))
@@ -46,6 +48,14 @@ async def find_duplicates(dry_run: bool = True):
 
         if not duplicates:
             print(f"检查了 {len(questions)} 道题目，未发现重复。")
+            report.counters = {
+                "checked": len(questions),
+                "duplicate_groups": 0,
+                "duplicates": 0,
+                "deleted": 0,
+            }
+            report_path = write_report(report)
+            print(f"Report: {report_path}")
             return
 
         total_dup = sum(len(qs) - 1 for qs in duplicates.values())
@@ -54,6 +64,11 @@ async def find_duplicates(dry_run: bool = True):
         for h, qs in duplicates.items():
             keep = qs[0]
             to_delete = qs[1:]
+            report.set_source(h, {
+                "kept_question_id": keep.id,
+                "deleted_question_ids": [q.id for q in to_delete],
+                "content_preview": keep.content[:120],
+            })
             print(f"  保留 ID={keep.id} \"{keep.content[:60]}...\"")
             for qd in to_delete:
                 print(f"    -> 删除 ID={qd.id} (重复)")
@@ -73,6 +88,15 @@ async def find_duplicates(dry_run: bool = True):
         else:
             await db.commit()
             print(f"已删除 {total_dup} 条重复题目。")
+
+        report.counters = {
+            "checked": len(questions),
+            "duplicate_groups": len(duplicates),
+            "duplicates": total_dup,
+            "deleted": 0 if dry_run else total_dup,
+        }
+        report_path = write_report(report)
+        print(f"Report: {report_path}")
 
 
 if __name__ == "__main__":

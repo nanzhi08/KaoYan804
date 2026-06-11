@@ -1,0 +1,5 @@
+399d038 fix: 添加 anthropic 依赖到 requirements.txt
+292c900 fix: 将 ClaudeProvider 导入改为懒加载，避免缺少 anthropic 包导致启动崩溃
+3ae069f fix: 修复 run_migrations 崩溃导致 Render 启动失败
+c417c90 feat: 导航精简10->6 + 复习进度样式优化 + 代码质量改进
+3c72421 feat: frontend modernization - '智识空间' design system overhaul

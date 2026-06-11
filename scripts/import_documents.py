@@ -11,6 +11,8 @@ from sqlalchemy import select
 from app.database import async_session, init_db
 from app.models.document import Document
 
+from scripts.import_report import ImportReport, write_report
+
 PACKAGE_DIR = Path(r"C:\Users\zhangsihai\Desktop\考研知识库系统\二工大804资料包")
 UPLOAD_DIR = Path(r"C:\Users\zhangsihai\Desktop\考研知识库系统\data\uploads")
 
@@ -99,6 +101,7 @@ def should_skip(rel_path: str) -> bool:
 
 async def import_documents():
     await init_db()
+    report = ImportReport(script="import_documents.py", dry_run=False)
 
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -109,6 +112,7 @@ async def import_documents():
         imported = 0
         skipped_dup = 0
         skipped_pattern = 0
+        skipped_type = 0
         errors = []
 
         for filepath in sorted(PACKAGE_DIR.rglob("*")):
@@ -126,6 +130,7 @@ async def import_documents():
             file_ext = filepath.suffix.lower().lstrip(".")
 
             if file_ext not in ("pdf", "docx", "doc", "txt", "md", "png", "jpg", "jpeg", "ppt", "pptx"):
+                skipped_type += 1
                 continue
 
             # Check duplicate
@@ -148,7 +153,8 @@ async def import_documents():
             try:
                 shutil.copy2(filepath, UPLOAD_DIR / dest_name)
             except Exception as e:
-                errors.append(f"Copy error {rel_path}: {e}")
+                error = f"Copy error {rel_path}: {e}"
+                errors.append(error)
                 continue
 
             # Create DB record
@@ -166,10 +172,23 @@ async def import_documents():
 
         await db.commit()
 
+    report.counters = {
+        "imported": imported,
+        "skipped_db_duplicate": skipped_dup,
+        "skipped_pattern": skipped_pattern,
+        "skipped_unsupported_type": skipped_type,
+        "errors": len(errors),
+    }
+    for error in errors:
+        report.add_error(error)
+    report_path = write_report(report)
+
     print(f"Import complete:")
     print(f"  Imported: {imported}")
     print(f"  Skipped (DB duplicate): {skipped_dup}")
     print(f"  Skipped (pattern): {skipped_pattern}")
+    print(f"  Skipped (unsupported type): {skipped_type}")
+    print(f"  Report: {report_path}")
     if errors:
         print(f"  Errors: {len(errors)}")
         for e in errors[:10]:

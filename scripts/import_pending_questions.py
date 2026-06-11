@@ -25,6 +25,7 @@ from app.database import async_session, init_db
 from sqlalchemy import select
 from app.models.knowledge_point import KnowledgePoint
 from app.models.question import Question, QuestionKnowledgePoint
+from scripts.import_report import ImportReport, write_report
 
 PACKAGE_DIR = Path(r"C:\Users\zhangsihai\Desktop\考研知识库系统\二工大804资料包")
 OCR_OUTPUT_DIR = Path(__file__).parent / "ocr_output"
@@ -890,10 +891,17 @@ def get_parsed_questions(source_filter: str = None) -> dict[str, list[dict]]:
 
 async def run_import(dry_run: bool = True, source_filter: str = None):
     await init_db()
+    report = ImportReport(
+        script="import_pending_questions.py",
+        dry_run=dry_run,
+        source_filter=source_filter,
+    )
 
     sources = get_parsed_questions(source_filter)
     if not sources:
         print("No sources found to process.")
+        report_path = write_report(report)
+        print(f"Report: {report_path}")
         return
 
     async with async_session() as db:
@@ -918,11 +926,13 @@ async def run_import(dry_run: bool = True, source_filter: str = None):
 
         total_new = 0
         total_skipped_dup = 0
+        total_missing_kp = 0
 
         for label, questions in sources.items():
             print_questions_summary(questions, label)
             new = 0
             dup = 0
+            missing_kp = 0
 
             for q_data in questions:
                 h = content_hash(q_data["content"])
@@ -936,6 +946,7 @@ async def run_import(dry_run: bool = True, source_filter: str = None):
                 if not kp:
                     kp = kp_by_key.get((q_data["part"], "1.1"))
                 if not kp:
+                    missing_kp += 1
                     continue
 
                 new += 1
@@ -950,14 +961,31 @@ async def run_import(dry_run: bool = True, source_filter: str = None):
 
             total_new += new
             total_skipped_dup += dup
+            total_missing_kp += missing_kp
+            report.set_source(label, {
+                "parsed": len(questions),
+                "new": new,
+                "duplicates_skipped": dup,
+                "missing_knowledge_point": missing_kp,
+            })
             print(f"  New: {new}, Duplicates skipped: {dup}")
 
         if not dry_run:
             await db.commit()
 
+        report.counters = {
+            "existing_questions": len(existing),
+            "sources": len(sources),
+            "new": total_new,
+            "duplicates_skipped": total_skipped_dup,
+            "missing_knowledge_point": total_missing_kp,
+        }
+        report_path = write_report(report)
+
         print(f"\n=== Total new: {total_new}, Duplicates skipped: {total_skipped_dup} ===")
         if dry_run:
             print("[DRY RUN] Use --no-dry-run to import.")
+        print(f"Report: {report_path}")
 
 
 if __name__ == "__main__":
