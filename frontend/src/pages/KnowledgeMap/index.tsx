@@ -3,36 +3,32 @@ import { Card, Tree, Spin, Empty, Descriptions, Tag, Button, Row, Col, Space, Mo
 import { useNavigate } from 'react-router-dom';
 import { RobotOutlined, BookOutlined, ArrowRightOutlined, ReloadOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import type { DataNode } from 'antd/es/tree';
+import type { EventDataNode } from 'antd/es/tree';
+import MarkdownCode from '../../components/MarkdownCode';
 import { fetchKnowledgePoints, fetchKnowledgePoint } from '../../services/knowledgeApi';
 import { useAppStore } from '../../stores/useAppStore';
 import type { KnowledgePoint } from '../../types';
 
 const partColors: Record<string, string> = {
-  C_programming: '#4A5BC9',
-  data_structure: '#3D8B5E',
-  root: '#D4953A',
+  C_programming: '#6366F1',
+  data_structure: '#10B981',
+  root: '#F59E0B',
 };
 
+interface StreamPayload {
+  error?: string;
+  chunk?: string;
+  done?: boolean;
+}
+
+const isJsonChunkBoundaryError = (error: unknown) => (
+  error instanceof Error && error.message.startsWith('Unexpected')
+);
+
 const markdownComponents = {
-  code({ node, className, children, ...props }: any) {
-    const match = /language-(\w+)/.exec(className || '');
-    const codeText = String(children).replace(/\n$/, '');
-    const inline = !match && !codeText.includes('\n');
-    if (inline) {
-      return <code className={className} {...props}>{children}</code>;
-    }
-    return (
-      <SyntaxHighlighter
-        style={oneDark}
-        language={match?.[1] || 'c'}
-        PreTag="div"
-        customStyle={{ borderRadius: 6, fontSize: 13 }}
-      >
-        {codeText}
-      </SyntaxHighlighter>
-    );
+  code({ className, children, ...props }: React.HTMLAttributes<HTMLElement>) {
+    return <MarkdownCode className={className} {...props}>{children}</MarkdownCode>;
   },
 };
 
@@ -49,11 +45,11 @@ const KnowledgeMap: React.FC = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const convertToTreeData = (nodes: KnowledgePoint[]): any[] =>
+  const convertToTreeData = (nodes: KnowledgePoint[]): DataNode[] =>
     nodes.map((node) => ({
       title: (
         <span>
-          <Tag color={partColors[node.part] || '#9B9590'} style={{ marginRight: 8 }}>
+          <Tag color={partColors[node.part] || '#94A3B8'} style={{ marginRight: 8 }}>
             {node.chapter || node.part}
           </Tag>
           {node.name}
@@ -89,19 +85,20 @@ const KnowledgeMap: React.FC = () => {
         const lines = text.split('\n').filter(l => l.startsWith('data: '));
         for (const line of lines) {
           try {
-            const data = JSON.parse(line.slice(6));
+            const data = JSON.parse(line.slice(6)) as StreamPayload;
             if (data.error) throw new Error(data.error);
             if (data.chunk) { fullText += data.chunk; setStreamingText(fullText); }
             if (data.done) {
               const updated = await fetchKnowledgePoint(selectedKnowledgePoint.id);
               setSelectedKnowledgePoint(updated);
             }
-          } catch (e: any) {
-            if (e.message && !e.message.startsWith('Unexpected')) throw e;
+          } catch (error: unknown) {
+            if (!isJsonChunkBoundaryError(error)) throw error;
           }
         }
       }
-    } catch (e: any) {
+    } catch (error) {
+      const e = error as { message?: string };
       antdMessage.error(e.message || 'AI讲解生成失败');
     } finally {
       setGenerating(false);
@@ -113,13 +110,13 @@ const KnowledgeMap: React.FC = () => {
     await handleGenerateExplanation();
   };
 
-  const handleSelect = async (_selectedKeys: any, info: any) => {
+  const handleSelect = async (_selectedKeys: React.Key[], info: { node: EventDataNode<DataNode> }) => {
     if (info.node.isLeaf) {
       setKpLoading(true);
       try {
-        const kp = await fetchKnowledgePoint(info.node.key);
+        const kp = await fetchKnowledgePoint(Number(info.node.key));
         setSelectedKnowledgePoint(kp);
-      } catch (e) { /* handled by interceptor */ }
+      } catch { /* handled by interceptor */ }
       finally { setKpLoading(false); }
     } else {
       setSelectedKnowledgePoint(null);
@@ -232,7 +229,7 @@ const KnowledgeMap: React.FC = () => {
                     <span>
                       <span style={{
                         display: 'inline-block', width: 8, height: 8, borderRadius: '50%',
-                        background: '#3D8B5E', marginRight: 8, verticalAlign: 'middle'
+                        background: '#10B981', marginRight: 8, verticalAlign: 'middle'
                       }} />
                       AI 讲解（已缓存）
                     </span>
@@ -243,14 +240,14 @@ const KnowledgeMap: React.FC = () => {
                     </Button>
                   }
                   hoverable
-                  style={{ cursor: 'pointer', borderColor: '#E8E3DC' }}
+                  style={{ cursor: 'pointer', borderColor: '#E2E8F0' }}
                   styles={{
                     body: { padding: '12px 16px' }
                   }}
                 >
                   <div style={{
                     maxHeight: 100, overflow: 'hidden', position: 'relative',
-                    fontSize: 13, lineHeight: 1.7, color: '#6B6560',
+                    fontSize: 13, lineHeight: 1.7, color: '#64748B',
                   }}>
                     <ReactMarkdown components={markdownComponents}>
                       {selectedKnowledgePoint.ai_explanation.slice(0, 300) + '...'}
@@ -269,8 +266,8 @@ const KnowledgeMap: React.FC = () => {
               <Button
                 type="default"
                 icon={<ArrowRightOutlined />}
-                onClick={() => navigate('/practice', {
-                  state: { knowledgePoint: selectedKnowledgePoint }
+                onClick={() => navigate('/study', {
+                  state: { knowledgePoint: selectedKnowledgePoint, tab: 'practice' }
                 })}
               >
                 练习此章节题目
@@ -288,9 +285,9 @@ const KnowledgeMap: React.FC = () => {
       <Modal
         title={
           <span style={{ fontSize: 16, fontWeight: 600 }}>
-            <RobotOutlined style={{ marginRight: 8, color: '#4A5BC9' }} />
+            <RobotOutlined style={{ marginRight: 8, color: '#6366F1' }} />
             AI 讲解
-            <span style={{ fontSize: 13, fontWeight: 400, color: '#9B9590', marginLeft: 12 }}>
+            <span style={{ fontSize: 13, fontWeight: 400, color: '#94A3B8', marginLeft: 12 }}>
               {selectedKnowledgePoint?.name}
             </span>
           </span>
@@ -307,7 +304,7 @@ const KnowledgeMap: React.FC = () => {
             fontSize: 15,
             lineHeight: 1.9,
             padding: '20px 28px',
-            color: '#2C2C2C',
+            color: '#0F172A',
           },
         }}
       >

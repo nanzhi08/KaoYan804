@@ -59,6 +59,7 @@ export interface PracticeResult {
   correct_answer: string;
   explanation: string;
   score_ratio?: number;
+  knowledge_point_ids?: number[];
 }
 
 export interface PracticeRecord {
@@ -91,6 +92,7 @@ export interface ChapterProgress {
   exam_weight: string;
   mastery_level: number;
   total_attempts: number;
+  next_review_at?: string | null;
 }
 
 export interface ProgressOverview {
@@ -102,6 +104,10 @@ export interface ProgressOverview {
   c_accuracy: number;
   ds_accuracy: number;
   recent_attempts: number;
+  today_attempts: number;
+  daily_target: number;
+  due_review_count: number;
+  weak_knowledge_count: number;
 }
 
 export interface PaginatedData<T> {
@@ -147,7 +153,7 @@ export interface Document {
   original_name: string;
   file_type: string;
   file_size: number;
-  tags: string[];
+  tags: string[] | string | null;
   content_text?: string;
   uploaded_at: string;
 }

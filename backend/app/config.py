@@ -1,9 +1,13 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env")
+
     APP_NAME: str = "考研804知识库系统"
+    APP_MODE: str = "single_user"
+    APP_USER_LABEL: str = "默认学习者"
 
     # Default: relative to project root. Set DATA_DIR env var on Render.
     DATA_DIR: str = str(Path(__file__).parent.parent.parent / "data")
@@ -25,6 +29,7 @@ class Settings(BaseSettings):
 
     # AI Provider Keys
     DEEPSEEK_API_KEY: str = ""
+    ANTHROPIC_API_KEY: str = ""
 
     # Default AI settings
     DEFAULT_AI_PROVIDER: str = "deepseek"
@@ -32,9 +37,6 @@ class Settings(BaseSettings):
     # Few-shot training settings
     ENABLE_FEW_SHOT: bool = True
     MAX_FEW_SHOT_EXAMPLES: int = 3
-
-    class Config:
-        env_file = ".env"
 
 
 settings = Settings()

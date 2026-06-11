@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, JSON, ForeignKey, Text
-from datetime import datetime
 from ..database import Base
+from ..time_utils import utc_now_naive
 
 
 class AIConversation(Base):
@@ -13,5 +13,5 @@ class AIConversation(Base):
     knowledge_point_id = Column(Integer, ForeignKey("knowledge_points.id"), nullable=True)
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=True)
     messages = Column(JSON, default=list)  # [{role, content}, ...]
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now_naive)
+    updated_at = Column(DateTime, default=utc_now_naive, onupdate=utc_now_naive)

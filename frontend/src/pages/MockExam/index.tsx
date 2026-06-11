@@ -39,7 +39,7 @@ const MockExam: React.FC = () => {
       setSubmitted(false);
       setScore(null);
       setCurrentIndex(0);
-    } catch (e) { /* handled by interceptor */ }
+    } catch { /* handled by interceptor */ }
     finally { setLoading(false); }
   };
 
@@ -51,7 +51,7 @@ const MockExam: React.FC = () => {
       const submitRes = await api.post(`/exam/${exam.exam_id}/submit`, answers);
       setScore(submitRes.data.score);
       setSubmitted(true);
-    } catch (e) { /* handled by interceptor */ }
+    } catch { /* handled by interceptor */ }
     finally { setLoading(false); }
   };
 
@@ -59,7 +59,7 @@ const MockExam: React.FC = () => {
     return (
       <Card title={<span><FormOutlined /> 模拟考试</span>}>
         <Result
-          icon={<FormOutlined style={{ color: '#4A5BC9' }} />}
+          icon={<FormOutlined style={{ color: '#6366F1' }} />}
           title="804 全真模拟考试"
           subTitle="按真题比例自动组卷：DS 80分 + C语言 70分 = 150分，限时3小时"
           extra={

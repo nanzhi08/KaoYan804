@@ -66,30 +66,54 @@ async def generate_exam(db: AsyncSession = Depends(get_db)):
         .order_by(func.random()).limit(3)
     )
 
+    ds_mc_items = ds_mc.scalars().all()
+    ds_calc_items = ds_calc.scalars().all()
+    ds_analysis_items = ds_analysis.scalars().all()
+    ds_prog_items = ds_prog.scalars().all()
+    c_mc_items = c_mc.scalars().all()
+    c_fill_items = c_fill.scalars().all()
+    c_read_items = c_read.scalars().all()
+    c_prog_items = c_prog.scalars().all()
+
+    required_sections = [
+        ("数据结构选择题", ds_mc_items, 10),
+        ("数据结构计算题", ds_calc_items, 1),
+        ("数据结构分析题", ds_analysis_items, 2),
+        ("数据结构编程题", ds_prog_items, 1),
+        ("C语言选择题", c_mc_items, 10),
+        ("C语言填空题", c_fill_items, 3),
+        ("C语言程序阅读题", c_read_items, 3),
+        ("C语言编程题", c_prog_items, 3),
+    ]
+    missing_sections = [
+        f"{label}需要{expected}题，当前{len(items)}题"
+        for label, items, expected in required_sections
+        if len(items) < expected
+    ]
+    if missing_sections:
+        raise HTTPException(status_code=400, detail="题库题型不足：" + "；".join(missing_sections))
+
     question_ids = []
-    # DS questions with scores
-    for q in ds_mc.scalars().all():
-        question_ids.append({"id": q.id, "score": 2})
-    for q in ds_calc.scalars().all():
-        question_ids.append({"id": q.id, "score": 10})
-    for q in ds_analysis.scalars().all():
-        question_ids.append({"id": q.id, "score": 15})
-    for q in ds_prog.scalars().all():
-        question_ids.append({"id": q.id, "score": 20})
 
-    # C questions with scores
-    for q in c_mc.scalars().all():
-        question_ids.append({"id": q.id, "score": 2})
-    for q in c_fill.scalars().all():
-        question_ids.append({"id": q.id, "score": 3})  # ~10 pts total
-    for q in c_read.scalars().all():
-        question_ids.append({"id": q.id, "score": 3})  # ~10 pts total
-    for q in c_prog.scalars().all():
-        question_ids.append({"id": q.id, "score": 10})
+    def add_scored_questions(questions: list[Question], scores: list[int]):
+        for question, score in zip(questions, scores):
+            question_ids.append({"id": question.id, "score": score})
 
-    # Adjust fill/read scores to exact 10 each
-    total_fill_score = sum(it["score"] for it in question_ids if it["score"] == 3 and it in question_ids[-9:-3])
-    total_read_score = sum(it["score"] for it in question_ids if it["score"] == 3 and it in question_ids[-6:-3])
+    # DS: 20 + 10 + 30 + 20 = 80
+    add_scored_questions(ds_mc_items, [2] * 10)
+    add_scored_questions(ds_calc_items, [10])
+    add_scored_questions(ds_analysis_items, [15, 15])
+    add_scored_questions(ds_prog_items, [20])
+
+    # C: 20 + 10 + 10 + 30 = 70
+    add_scored_questions(c_mc_items, [2] * 10)
+    add_scored_questions(c_fill_items, [4, 3, 3])
+    add_scored_questions(c_read_items, [4, 3, 3])
+    add_scored_questions(c_prog_items, [10, 10, 10])
+
+    total_configured_score = sum(item["score"] for item in question_ids)
+    if total_configured_score != 150:
+        raise HTTPException(status_code=500, detail=f"试卷分值配置错误：当前合计 {total_configured_score} 分")
 
     exam = MockExam(
         title=f"804模拟考试 - {datetime.now().strftime('%Y-%m-%d %H:%M')}",

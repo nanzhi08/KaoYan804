@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
-from datetime import datetime
 
 from ..database import get_db
 from ..schemas.common import APIResponse
 from ..schemas.question import PracticeSubmit
 from ..services import question_service
 from ..models.practice_record import PracticeRecord
+from ..time_utils import local_today_start_as_utc_naive
 
 router = APIRouter(prefix="/api/practice", tags=["练习管理"])
 
@@ -78,7 +78,7 @@ async def practice_stats(db: AsyncSession = Depends(get_db)):
     wrong_val = (await db.execute(
         select(func.count(PracticeRecord.id)).where(PracticeRecord.is_correct == False)
     )).scalar() or 0
-    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    today = local_today_start_as_utc_naive()
     today_val = (await db.execute(
         select(func.count(PracticeRecord.id)).where(PracticeRecord.created_at >= today)
     )).scalar() or 0

@@ -79,13 +79,16 @@ async def chat_with_ai(data: ChatRequest, db: AsyncSession = Depends(get_db)):
     messages = data.messages + [{"role": "user", "content": data.message}]
 
     async def generate():
-        async for chunk, conv in ai_service.chat_stream(
-            db, data.provider, messages, data.conversation_id,
-            data.knowledge_point_id, data.question_id,
-        ):
-            yield f"data: {json.dumps({'chunk': chunk, 'conversation_id': conv.id})}\n\n"
-        last_id = conv.messages[-1].get("id", "") if conv.messages else ""
-        yield f"data: {json.dumps({'done': True, 'conversation_id': conv.id, 'msg_id': last_id})}\n\n"
+        try:
+            async for chunk, conv in ai_service.chat_stream(
+                db, data.provider, messages, data.conversation_id,
+                data.knowledge_point_id, data.question_id,
+            ):
+                yield f"data: {json.dumps({'chunk': chunk, 'conversation_id': conv.id})}\n\n"
+            last_id = conv.messages[-1].get("id", "") if conv.messages else ""
+            yield f"data: {json.dumps({'done': True, 'conversation_id': conv.id, 'msg_id': last_id})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
     return StreamingResponse(generate(), media_type="text/event-stream")
 
@@ -99,14 +102,13 @@ async def explain_knowledge_point(
     prompt = await ai_service.build_explain_prompt(db, kp_id)
 
     async def generate():
-        provider_obj = ai_service.get_provider(provider)
-        messages = ai_service._ensure_message_ids([
-            {"role": "system", "content": ai_service.SYSTEM_PROMPT},
-            {"role": "user", "content": prompt},
-        ])
-        full_text = ""
-        conv = None
         try:
+            provider_obj = ai_service.get_provider(provider)
+            messages = ai_service._ensure_message_ids([
+                {"role": "system", "content": ai_service.SYSTEM_PROMPT},
+                {"role": "user", "content": prompt},
+            ])
+            full_text = ""
             async for chunk in provider_obj.chat_stream(messages):
                 full_text += chunk
                 yield f"data: {json.dumps({'chunk': chunk})}\n\n"
@@ -168,13 +170,13 @@ async def explain_and_save_stream(
     prompt = await ai_service.build_explain_prompt(db, kp_id)
 
     async def generate():
-        provider_obj = ai_service.get_provider(provider)
-        messages = ai_service._ensure_message_ids([
-            {"role": "system", "content": ai_service.SYSTEM_PROMPT},
-            {"role": "user", "content": prompt},
-        ])
-        full_text = ""
         try:
+            provider_obj = ai_service.get_provider(provider)
+            messages = ai_service._ensure_message_ids([
+                {"role": "system", "content": ai_service.SYSTEM_PROMPT},
+                {"role": "user", "content": prompt},
+            ])
+            full_text = ""
             async for chunk in provider_obj.chat_stream(messages):
                 full_text += chunk
                 yield f"data: {json.dumps({'chunk': chunk})}\n\n"
@@ -263,13 +265,13 @@ async def review_answer(
     prompt = await ai_service.build_review_prompt(db, question_id, user_answer)
 
     async def generate():
-        provider_obj = ai_service.get_provider(provider)
-        messages = ai_service._ensure_message_ids([
-            {"role": "system", "content": ai_service.SYSTEM_PROMPT},
-            {"role": "user", "content": prompt},
-        ])
-        full_text = ""
         try:
+            provider_obj = ai_service.get_provider(provider)
+            messages = ai_service._ensure_message_ids([
+                {"role": "system", "content": ai_service.SYSTEM_PROMPT},
+                {"role": "user", "content": prompt},
+            ])
+            full_text = ""
             async for chunk in provider_obj.chat_stream(messages):
                 full_text += chunk
                 yield f"data: {json.dumps({'chunk': chunk})}\n\n"

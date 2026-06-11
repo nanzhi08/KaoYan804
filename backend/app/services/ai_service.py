@@ -4,6 +4,7 @@ from typing import AsyncIterator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..ai_providers.claude_provider import ClaudeProvider
 from ..ai_providers.deepseek_provider import DeepSeekProvider
 from ..config import settings
 from ..models.ai_conversation import AIConversation
@@ -61,6 +62,18 @@ def _extract_keywords_from_text(text: str, max_keywords: int = 5) -> list[str]:
 
 
 def get_provider(provider_name: str):
+    if provider_name == "deepseek":
+        if not settings.DEEPSEEK_API_KEY:
+            raise RuntimeError("AI服务未配置 DEEPSEEK_API_KEY，请先在环境变量或 .env 中设置后再使用。")
+        return DeepSeekProvider()
+
+    if provider_name == "claude":
+        if not settings.ANTHROPIC_API_KEY:
+            raise RuntimeError("AI服务未配置 ANTHROPIC_API_KEY，请先在环境变量或 .env 中设置后再使用。")
+        return ClaudeProvider()
+
+    if not settings.DEEPSEEK_API_KEY:
+        raise RuntimeError("AI服务未配置 DEEPSEEK_API_KEY，请先在环境变量或 .env 中设置后再使用。")
     return DeepSeekProvider()
 
 

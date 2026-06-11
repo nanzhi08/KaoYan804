@@ -1,9 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import datetime
 
 
 class QuestionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     type: str
     part: str
@@ -15,9 +17,6 @@ class QuestionOut(BaseModel):
     source: Optional[str] = None
     code_snippet: Optional[str] = None
     knowledge_point_ids: list[int] = []
-
-    class Config:
-        from_attributes = True
 
 
 class QuestionListParams(BaseModel):

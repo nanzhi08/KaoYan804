@@ -71,7 +71,9 @@ const WrongRecords: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadData();
+    queueMicrotask(() => {
+      void loadData();
+    });
   }, [loadData]);
 
   useEffect(() => {
@@ -95,7 +97,7 @@ const WrongRecords: React.FC = () => {
 
     reset();
     setQuestions(pendingWrongQuestions);
-    navigate('/practice', { state: { autoStart: true, mode: 'wrong' } });
+    navigate('/study', { state: { autoStart: true, mode: 'wrong' } });
   }, [navigate, pendingWrongQuestions, reset, setQuestions]);
 
   const handleOpenDetail = useCallback(async (record: PracticeRecord) => {
@@ -163,7 +165,7 @@ const WrongRecords: React.FC = () => {
           type="info"
           showIcon
           style={{ marginBottom: 16 }}
-          message={`错题数据每 1 分钟自动刷新一次，最近刷新时间：${lastUpdatedAt || '刚刚'}`}
+          title={`错题数据每 1 分钟自动刷新一次，最近刷新时间：${lastUpdatedAt || '刚刚'}`}
         />
 
         {wrongRecords.length === 0 ? (
@@ -243,7 +245,7 @@ const WrongRecords: React.FC = () => {
               </Descriptions.Item>
               {selectedQuestion.code_snippet && (
                 <Descriptions.Item label="代码片段">
-                  <pre style={{ margin: 0, background: '#FAF7F2', padding: 12, borderRadius: 8, overflow: 'auto' }}>
+                  <pre style={{ margin: 0, background: '#F8FAFC', padding: 12, borderRadius: 8, overflow: 'auto' }}>
                     <code>{selectedQuestion.code_snippet}</code>
                   </pre>
                 </Descriptions.Item>

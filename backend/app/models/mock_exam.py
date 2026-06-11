@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, JSON, ForeignKey
-from datetime import datetime
 from ..database import Base
+from ..time_utils import utc_now_naive
 
 
 class MockExam(Base):
@@ -16,4 +16,4 @@ class MockExam(Base):
     status = Column(String(20), default="pending")  # "pending" | "in_progress" | "completed"
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now_naive)

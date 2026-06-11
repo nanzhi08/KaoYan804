@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, JSON, ForeignKey, Text, Boolean
 from sqlalchemy.orm import relationship
-from datetime import datetime
 from ..database import Base
+from ..time_utils import utc_now_naive
 
 
 class KnowledgePoint(Base):
@@ -17,8 +17,9 @@ class KnowledgePoint(Base):
     difficulty = Column(Integer, default=3)
     exam_weight = Column(String(20), default="中频")  # "高频" | "中频" | "低频"
     ai_explanation = Column(Text, default="")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now_naive)
 
-    children = relationship("KnowledgePoint", backref="parent", remote_side=[id], lazy="selectin")
+    parent = relationship("KnowledgePoint", remote_side=[id], back_populates="children")
+    children = relationship("KnowledgePoint", back_populates="parent", lazy="selectin")
     questions = relationship("QuestionKnowledgePoint", back_populates="knowledge_point", lazy="selectin")
     mastery = relationship("KnowledgeMastery", back_populates="knowledge_point", uselist=False, lazy="selectin")
