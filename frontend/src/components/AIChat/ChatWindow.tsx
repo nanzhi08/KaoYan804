@@ -2,9 +2,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Input, Button, Empty, Spin, Alert } from 'antd';
 import { SendOutlined, RobotOutlined, UserOutlined, ClearOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import type { KnowledgePoint, Message } from '../../types';
+import MarkdownCode from '../MarkdownCode';
 import FeedbackButton from './FeedbackButton';
 
 interface ChatWindowProps {
@@ -13,19 +12,6 @@ interface ChatWindowProps {
   initialMessage?: string;
   compact?: boolean;
 }
-
-/** Memoized code block to avoid re-rendering unchanged highlight blocks */
-const CodeBlock = React.memo(({ language, code }: { language: string; code: string }) => (
-  <SyntaxHighlighter
-    style={oneDark}
-    language={language || 'c'}
-    PreTag="div"
-    customStyle={{ borderRadius: 6, fontSize: 13 }}
-  >
-    {code}
-  </SyntaxHighlighter>
-));
-CodeBlock.displayName = 'CodeBlock';
 
 /** Memoized message bubble - avoids re-render when sibling messages update */
 const MessageBubble = React.memo(({ msg, idx, convId }: {
@@ -40,13 +26,8 @@ const MessageBubble = React.memo(({ msg, idx, convId }: {
         {msg.role === 'assistant' ? (
           <ReactMarkdown
             components={{
-              code({ node, className, children, ...props }) {
-                const match = /language-(\w+)/.exec(className || '');
-                const codeText = String(children).replace(/\n$/, '');
-                if (match || codeText.includes('\n')) {
-                  return <CodeBlock language={match?.[1] || 'c'} code={codeText} />;
-                }
-                return <code className={className} {...props}>{children}</code>;
+              code({ className, children, ...props }) {
+                return <MarkdownCode className={className} {...props}>{children}</MarkdownCode>;
               },
             }}
           >
@@ -70,6 +51,17 @@ const MessageBubble = React.memo(({ msg, idx, convId }: {
 ));
 MessageBubble.displayName = 'MessageBubble';
 
+interface StreamPayload {
+  error?: string;
+  chunk?: string;
+  conversation_id?: number;
+  msg_id?: string;
+}
+
+const isJsonChunkBoundaryError = (error: unknown) => (
+  error instanceof Error && error.message.startsWith('Unexpected')
+);
+
 const ChatWindow: React.FC<ChatWindowProps> = ({ knowledgePoint, provider, initialMessage, compact }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -78,24 +70,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ knowledgePoint, provider, initi
   const [conversationId, setConversationId] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
+  const initialMessageSentRef = useRef<string | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  useEffect(() => {
-    if (knowledgePoint) {
-      setMessages([]);
-      setConversationId(null);
-      handleAIExplain(knowledgePoint);
-    }
-  }, [knowledgePoint?.id]);
-
-  useEffect(() => {
-    if (initialMessage) {
-      handleSendWithMessage(initialMessage);
-    }
-  }, []);
 
   /** Shared SSE streaming logic with throttled UI updates via rAF */
   const streamResponse = useCallback(async (
@@ -131,13 +110,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ knowledgePoint, provider, initi
         const lines = text.split('\n').filter(l => l.startsWith('data: '));
         for (const line of lines) {
           try {
-            const data = JSON.parse(line.slice(6));
+            const data = JSON.parse(line.slice(6)) as StreamPayload;
             if (data.error) throw new Error(data.error);
             if (data.chunk) fullText += data.chunk;
             if (data.conversation_id) convId = data.conversation_id;
             if (data.msg_id) msgId = data.msg_id;
-          } catch (e: any) {
-            if (e.message && !e.message.startsWith('Unexpected')) throw e;
+          } catch (error: unknown) {
+            if (!isJsonChunkBoundaryError(error)) throw error;
           }
         }
 
@@ -152,16 +131,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ knowledgePoint, provider, initi
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       setMessages([...baseMessages, { role: 'assistant', content: fullText, id: msgId }]);
       if (convId) setConversationId(convId);
-    } catch (e: any) {
+    } catch (error) {
+      const e = error as { message?: string };
       setError(e.message || 'AI请求失败，请检查后端服务');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const handleAIExplain = async (kp: KnowledgePoint) => {
+  const handleAIExplain = useCallback(async (kp: KnowledgePoint) => {
     const explainMsg = `请帮我详细讲解【${kp.name}】这个知识点。`;
     const baseMessages: Message[] = [{ role: 'user', content: explainMsg }];
+    setConversationId(null);
     setMessages(baseMessages);
 
     const params = new URLSearchParams({ kp_id: String(kp.id), provider });
@@ -169,33 +150,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ knowledgePoint, provider, initi
       fetch(`/api/ai/explain?${params}`, { method: 'POST' }),
       baseMessages,
     );
-  };
+  }, [provider, streamResponse]);
 
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
-    const userMsg = input.trim();
-    setInput('');
-    const newMessages: Message[] = [...messages, { role: 'user', content: userMsg }];
-    setMessages(newMessages);
-
-    await streamResponse(
-      fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          provider,
-          message: userMsg,
-          conversation_id: conversationId,
-          knowledge_point_id: knowledgePoint?.id,
-          messages,
-        }),
-      }),
-      newMessages,
-    );
-  };
-
-  const handleSendWithMessage = async (msg: string) => {
-    const newMessages: Message[] = [...messages, { role: 'user', content: msg }];
+  const handleSendWithMessage = useCallback(async (msg: string, baseMessages = messages) => {
+    const newMessages: Message[] = [...baseMessages, { role: 'user', content: msg }];
     setMessages(newMessages);
     await streamResponse(
       fetch('/api/ai/chat', {
@@ -205,11 +163,19 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ knowledgePoint, provider, initi
           provider,
           message: msg,
           conversation_id: conversationId,
-          messages,
+          knowledge_point_id: knowledgePoint?.id,
+          messages: baseMessages,
         }),
       }),
       newMessages,
     );
+  }, [conversationId, knowledgePoint?.id, messages, provider, streamResponse]);
+
+  const handleSend = async () => {
+    if (!input.trim() || loading) return;
+    const userMsg = input.trim();
+    setInput('');
+    await handleSendWithMessage(userMsg);
   };
 
   const handleClear = () => {
@@ -217,6 +183,21 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ knowledgePoint, provider, initi
     setConversationId(null);
     setError(null);
   };
+
+  useEffect(() => {
+    if (!knowledgePoint) return;
+    queueMicrotask(() => {
+      void handleAIExplain(knowledgePoint);
+    });
+  }, [handleAIExplain, knowledgePoint]);
+
+  useEffect(() => {
+    if (!initialMessage || initialMessageSentRef.current === initialMessage) return;
+    initialMessageSentRef.current = initialMessage;
+    queueMicrotask(() => {
+      void handleSendWithMessage(initialMessage, []);
+    });
+  }, [handleSendWithMessage, initialMessage]);
 
   const msgListHeight = compact ? 520 : 'calc(100vh - 240px)';
 

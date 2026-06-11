@@ -71,7 +71,9 @@ const WrongRecords: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadData();
+    queueMicrotask(() => {
+      void loadData();
+    });
   }, [loadData]);
 
   useEffect(() => {
@@ -95,7 +97,7 @@ const WrongRecords: React.FC = () => {
 
     reset();
     setQuestions(pendingWrongQuestions);
-    navigate('/practice', { state: { autoStart: true, mode: 'wrong' } });
+    navigate('/study', { state: { autoStart: true, mode: 'wrong' } });
   }, [navigate, pendingWrongQuestions, reset, setQuestions]);
 
   const handleOpenDetail = useCallback(async (record: PracticeRecord) => {
@@ -163,7 +165,7 @@ const WrongRecords: React.FC = () => {
           type="info"
           showIcon
           style={{ marginBottom: 16 }}
-          message={`错题数据每 1 分钟自动刷新一次，最近刷新时间：${lastUpdatedAt || '刚刚'}`}
+          title={`错题数据每 1 分钟自动刷新一次，最近刷新时间：${lastUpdatedAt || '刚刚'}`}
         />
 
         {wrongRecords.length === 0 ? (

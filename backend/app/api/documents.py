@@ -1,15 +1,19 @@
-import os
+﻿import os
+from pathlib import Path
+from uuid import uuid4
 
 import aiofiles
 from fastapi import APIRouter, Depends, UploadFile, File
+from sqlalchemy import select as sa_select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..config import settings
 from ..database import get_db
 from ..schemas.common import APIResponse
-from ..config import settings
 
 router = APIRouter(prefix="/api/documents", tags=["文档管理"])
 
+_ALLOWED_TYPES = {"pdf", "doc", "docx", "txt", "md", "png", "jpg", "jpeg"}
 _MOJIBAKE_CHARS = set("ÄÅÆÇÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ¶·¸¹º»¼½¾¿")
 
 
@@ -52,12 +56,75 @@ def _repair_filename(name: str) -> str:
     return best
 
 
+def _safe_original_name(raw_filename: str) -> str:
+    repaired = _repair_filename(raw_filename or "unnamed")
+    return Path(repaired).name or "unnamed"
+
+
+def _stored_filename(original_name: str) -> str:
+    suffix = Path(original_name).suffix.lower()
+    stem = Path(original_name).stem[:80] or "document"
+    safe_stem = "".join(ch if ch.isalnum() or ch in "._-一-龥" else "_" for ch in stem).strip("._")
+    return f"{safe_stem or 'document'}_{uuid4().hex[:12]}{suffix}"
+
+
+def _file_type(filename: str) -> str:
+    suffix = Path(filename).suffix.lower().lstrip(".")
+    return suffix or "txt"
+
+
+def _decode_text(content: bytes) -> str:
+    for encoding in ("utf-8-sig", "utf-8", "gb18030", "gbk"):
+        try:
+            return content.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+    return content.decode("utf-8", errors="replace")
+
+
+def _extract_content(file_type: str, content: bytes) -> str:
+    if file_type in {"txt", "md"}:
+        return _decode_text(content)
+
+    if file_type == "doc":
+        return "[.doc 格式不支持文本提取，请先转换为 .docx 后上传。]"
+
+    if file_type == "docx":
+        try:
+            from io import BytesIO
+            from docx import Document
+
+            doc = Document(BytesIO(content))
+            return "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+        except Exception as e:
+            return f"[解析失败: {e}]"
+
+    if file_type == "pdf":
+        try:
+            from ..services.ocr_service import ocr_pdf
+
+            _was_scanned, text = ocr_pdf(content)
+            return text
+        except Exception as e:
+            return f"[解析失败: {e}]"
+
+    if file_type in {"png", "jpg", "jpeg"}:
+        try:
+            from ..services.ocr_service import ocr_image
+
+            return ocr_image(content)
+        except Exception as e:
+            return f"[解析失败: {e}]"
+
+    return ""
+
+
 async def _repair_document_record(doc) -> bool:
-    fixed_filename = _repair_filename(doc.filename)
-    fixed_original_name = _repair_filename(doc.original_name)
+    fixed_filename = Path(_repair_filename(doc.filename or "")).name
+    fixed_original_name = _safe_original_name(doc.original_name or "unnamed")
     changed = False
 
-    if fixed_filename != doc.filename:
+    if fixed_filename and fixed_filename != doc.filename:
         old_path = os.path.join(settings.UPLOAD_DIR, doc.filename)
         new_path = os.path.join(settings.UPLOAD_DIR, fixed_filename)
         if os.path.exists(old_path) and old_path != new_path and not os.path.exists(new_path):
@@ -86,79 +153,50 @@ async def upload_document(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
 ):
-    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-    raw_filename = file.filename or "unnamed"
-    normalized_filename = _repair_filename(raw_filename)
-    file_path = os.path.join(settings.UPLOAD_DIR, normalized_filename)
-
-    async with aiofiles.open(file_path, "wb") as f:
-        content = await file.read()
-        await f.write(content)
-
-    file_type = normalized_filename.rsplit(".", 1)[-1].lower() if "." in normalized_filename else "txt"
-    content_text = ""
-
-    # Parse document content
-    if file_type == "txt" or file_type == "md":
-        try:
-            content_text = content.decode("utf-8")
-        except UnicodeDecodeError:
-            try:
-                content_text = content.decode("gbk")
-            except UnicodeDecodeError:
-                content_text = content.decode("utf-8", errors="replace")
-    elif file_type == "docx":
-        try:
-            from io import BytesIO
-            from docx import Document
-            doc = Document(BytesIO(content))
-            content_text = "\n".join([p.text for p in doc.paragraphs if p.text.strip()])
-        except Exception as e:
-            content_text = f"[解析失败: {e}]"
-    elif file_type == "pdf":
-        try:
-            from ..services.ocr_service import ocr_pdf
-            was_scanned, content_text = ocr_pdf(content)
-        except Exception as e:
-            content_text = f"[解析失败: {e}]"
-    elif file_type in ("png", "jpg", "jpeg"):
-        try:
-            from ..services.ocr_service import ocr_image
-            content_text = ocr_image(content)
-        except Exception as e:
-            content_text = f"[解析失败: {e}]"
-
     from ..models.document import Document
-    from sqlalchemy import select as sa_select
+
+    content = await file.read()
+    original_name = _safe_original_name(file.filename or "unnamed")
+    file_type = _file_type(original_name)
+
+    if file_type not in _ALLOWED_TYPES:
+        return APIResponse(code=400, message="不支持的文件类型")
 
     existing = await db.execute(
         sa_select(Document).where(
-            Document.original_name == normalized_filename,
+            Document.original_name == original_name,
             Document.file_size == len(content),
         )
     )
     if existing.scalar_one_or_none():
         return APIResponse(code=409, message="该文件已存在，请勿重复上传")
 
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+    stored_name = _stored_filename(original_name)
+    file_path = os.path.join(settings.UPLOAD_DIR, stored_name)
+
+    async with aiofiles.open(file_path, "wb") as f:
+        await f.write(content)
+
     doc = Document(
-        filename=normalized_filename,
-        original_name=normalized_filename,
+        filename=stored_name,
+        original_name=original_name,
         file_type=file_type,
         file_size=len(content),
-        content_text=content_text,
+        content_text=_extract_content(file_type, content),
     )
     db.add(doc)
     await db.commit()
+    await db.refresh(doc)
 
-    return APIResponse(data={"id": doc.id, "filename": normalized_filename, "file_type": file_type})
+    return APIResponse(data={"id": doc.id, "filename": original_name, "file_type": file_type})
 
 
 @router.get("")
 async def list_documents(db: AsyncSession = Depends(get_db)):
-    from sqlalchemy import select
     from ..models.document import Document
 
-    result = await db.execute(select(Document).order_by(Document.uploaded_at.desc()))
+    result = await db.execute(sa_select(Document).order_by(Document.uploaded_at.desc()))
     docs = result.scalars().all()
     await _repair_documents_if_needed(db, docs)
     return APIResponse(data=[
@@ -176,10 +214,9 @@ async def list_documents(db: AsyncSession = Depends(get_db)):
 
 @router.get("/{doc_id}")
 async def get_document(doc_id: int, db: AsyncSession = Depends(get_db)):
-    from sqlalchemy import select
     from ..models.document import Document
 
-    result = await db.execute(select(Document).where(Document.id == doc_id))
+    result = await db.execute(sa_select(Document).where(Document.id == doc_id))
     doc = result.scalar_one_or_none()
     if not doc:
         return APIResponse(code=404, message="文档不存在")
@@ -197,10 +234,9 @@ async def get_document(doc_id: int, db: AsyncSession = Depends(get_db)):
 
 @router.get("/{doc_id}/content")
 async def get_document_content(doc_id: int, db: AsyncSession = Depends(get_db)):
-    from sqlalchemy import select
     from ..models.document import Document
 
-    result = await db.execute(select(Document).where(Document.id == doc_id))
+    result = await db.execute(sa_select(Document).where(Document.id == doc_id))
     doc = result.scalar_one_or_none()
     if not doc:
         return APIResponse(code=404, message="文档不存在")
@@ -210,14 +246,19 @@ async def get_document_content(doc_id: int, db: AsyncSession = Depends(get_db)):
 
 @router.delete("/{doc_id}")
 async def delete_document(doc_id: int, db: AsyncSession = Depends(get_db)):
-    from sqlalchemy import select
     from ..models.document import Document
 
-    result = await db.execute(select(Document).where(Document.id == doc_id))
+    result = await db.execute(sa_select(Document).where(Document.id == doc_id))
     doc = result.scalar_one_or_none()
     if not doc:
         return APIResponse(code=404, message="文档不存在")
     await _repair_documents_if_needed(db, [doc])
+
+    file_path = os.path.join(settings.UPLOAD_DIR, doc.filename)
     await db.delete(doc)
     await db.commit()
+
+    if os.path.isfile(file_path):
+        os.remove(file_path)
+
     return APIResponse(message="删除成功")

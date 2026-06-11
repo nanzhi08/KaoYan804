@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Spin, Empty, Tag, Collapse, List, Typography, Button, Popconfirm, message } from 'antd';
+import { Card, Spin, Empty, Tag, Collapse, Typography, Button, Popconfirm, message } from 'antd';
 import { HistoryOutlined, RobotOutlined, UserOutlined, ClockCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
 import api from '../../services/api';
-import type { Message } from '../../types';
+import type { APIResponse, Message } from '../../types';
 
 const { Paragraph } = Typography;
 
@@ -16,6 +16,10 @@ interface Conversation {
   updated_at: string;
 }
 
+interface ConversationDetail {
+  messages: Message[];
+}
+
 const AIHistory: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,8 +28,11 @@ const AIHistory: React.FC = () => {
 
   useEffect(() => {
     api.get('/ai/conversations')
-      .then((res: any) => setConversations(res.data || []))
-      .catch(() => {})
+      .then((res) => {
+        const body = res as unknown as APIResponse<Conversation[]>;
+        setConversations(body.data || []);
+      })
+      .catch(() => undefined)
       .finally(() => setLoading(false));
   }, []);
 
@@ -33,9 +40,11 @@ const AIHistory: React.FC = () => {
     if (details[convId]) return;
     setDetailLoading(convId);
     try {
-      const res = await api.get(`/ai/conversations/${convId}`) as any;
+      const res = await api.get(`/ai/conversations/${convId}`) as unknown as APIResponse<ConversationDetail>;
       setDetails(prev => ({ ...prev, [convId]: res.data?.messages || [] }));
-    } catch {} finally {
+    } catch {
+      // handled by api interceptor
+    } finally {
       setDetailLoading(null);
     }
   };
@@ -99,36 +108,33 @@ const AIHistory: React.FC = () => {
               children: detailLoading === conv.id ? (
                 <Spin size="small" style={{ display: 'block', margin: '20px auto' }} />
               ) : (
-                <List
-                  dataSource={details[conv.id] || []}
-                  renderItem={(msg: Message) => (
-                    <List.Item style={{ border: 'none', padding: '12px 0' }}>
-                      <div style={{ display: 'flex', gap: 10, width: '100%' }}>
-                        <div style={{
-                          width: 32, height: 32, borderRadius: '50%', display: 'flex',
-                          alignItems: 'center', justifyContent: 'center', color: '#fff',
-                          flexShrink: 0, fontSize: 13,
-                          background: msg.role === 'user' ? '#6366F1' : '#10B981',
-                        }}>
-                          {msg.role === 'user' ? <UserOutlined /> : <RobotOutlined />}
-                        </div>
-                        <div style={{
-                          flex: 1, padding: '10px 14px', borderRadius: 10,
-                          background: msg.role === 'user' ? '#F5F3FF' : '#F8FAFC',
-                          overflow: 'hidden',
-                        }}>
-                          {msg.role === 'assistant' ? (
-                            <ReactMarkdown>{msg.content}</ReactMarkdown>
-                          ) : (
-                            <Paragraph style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
-                              {msg.content}
-                            </Paragraph>
-                          )}
-                        </div>
+                <div style={{ display: 'grid', gap: 12 }}>
+                  {(details[conv.id] || []).map((msg, index) => (
+                    <div key={`${msg.role}-${index}`} style={{ display: 'flex', gap: 10, width: '100%' }}>
+                      <div style={{
+                        width: 32, height: 32, borderRadius: '50%', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center', color: '#fff',
+                        flexShrink: 0, fontSize: 13,
+                        background: msg.role === 'user' ? '#6366F1' : '#10B981',
+                      }}>
+                        {msg.role === 'user' ? <UserOutlined /> : <RobotOutlined />}
                       </div>
-                    </List.Item>
-                  )}
-                />
+                      <div style={{
+                        flex: 1, padding: '10px 14px', borderRadius: 10,
+                        background: msg.role === 'user' ? '#F5F3FF' : '#F8FAFC',
+                        overflow: 'hidden',
+                      }}>
+                        {msg.role === 'assistant' ? (
+                          <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        ) : (
+                          <Paragraph style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
+                            {msg.content}
+                          </Paragraph>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ),
             }))}
           />

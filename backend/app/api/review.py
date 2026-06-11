@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 from datetime import datetime, timedelta
 
 from ..database import get_db
@@ -18,6 +18,14 @@ def sm2_algorithm(mastery: KnowledgeMastery, quality: int):
     """
     if quality < 0 or quality > 5:
         raise ValueError("quality must be 0-5")
+
+    mastery.mastery_level = mastery.mastery_level or 0.0
+    mastery.ease_factor = mastery.ease_factor or 2.5
+    mastery.interval_days = mastery.interval_days or 0
+    mastery.repetitions = mastery.repetitions or 0
+    mastery.total_attempts = mastery.total_attempts or 0
+    mastery.correct_attempts = mastery.correct_attempts or 0
+    now = datetime.now()
 
     if quality >= 3:
         # Correct response
@@ -40,8 +48,8 @@ def sm2_algorithm(mastery: KnowledgeMastery, quality: int):
     # Update mastery level: simple rolling average based on quality
     mastery.mastery_level = min(1.0, (mastery.mastery_level * 0.7 + (quality / 5.0) * 0.3))
 
-    mastery.last_reviewed_at = datetime.now()
-    mastery.next_review_at = datetime.now() + timedelta(days=mastery.interval_days)
+    mastery.last_reviewed_at = now
+    mastery.next_review_at = now + timedelta(days=mastery.interval_days)
     mastery.total_attempts += 1
     if quality >= 3:
         mastery.correct_attempts += 1
@@ -56,8 +64,8 @@ async def get_due_reviews(db: AsyncSession = Depends(get_db)):
 
     result = await db.execute(
         select(KnowledgeMastery)
-        .where(KnowledgeMastery.next_review_at <= now)
-        .order_by(KnowledgeMastery.next_review_at)
+        .where(or_(KnowledgeMastery.next_review_at.is_(None), KnowledgeMastery.next_review_at <= now))
+        .order_by(KnowledgeMastery.next_review_at.isnot(None), KnowledgeMastery.next_review_at)
         .limit(20)
     )
     due_items = result.scalars().all()
@@ -145,7 +153,7 @@ async def review_stats(db: AsyncSession = Depends(get_db)):
     # Due now
     due_result = await db.execute(
         select(func.count(KnowledgeMastery.id))
-        .where(KnowledgeMastery.next_review_at <= now)
+        .where(or_(KnowledgeMastery.next_review_at.is_(None), KnowledgeMastery.next_review_at <= now))
     )
     due_now = due_result.scalar()
 
@@ -159,7 +167,7 @@ async def review_stats(db: AsyncSession = Depends(get_db)):
     week_later = now + timedelta(days=7)
     week_result = await db.execute(
         select(func.count(KnowledgeMastery.id))
-        .where(KnowledgeMastery.next_review_at.between(now, week_later))
+        .where(or_(KnowledgeMastery.next_review_at.is_(None), KnowledgeMastery.next_review_at <= week_later))
     )
     due_this_week = week_result.scalar()
 

@@ -3,8 +3,9 @@ import { Card, Tree, Spin, Empty, Descriptions, Tag, Button, Row, Col, Space, Mo
 import { useNavigate } from 'react-router-dom';
 import { RobotOutlined, BookOutlined, ArrowRightOutlined, ReloadOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import type { DataNode } from 'antd/es/tree';
+import type { EventDataNode } from 'antd/es/tree';
+import MarkdownCode from '../../components/MarkdownCode';
 import { fetchKnowledgePoints, fetchKnowledgePoint } from '../../services/knowledgeApi';
 import { useAppStore } from '../../stores/useAppStore';
 import type { KnowledgePoint } from '../../types';
@@ -15,24 +16,19 @@ const partColors: Record<string, string> = {
   root: '#F59E0B',
 };
 
+interface StreamPayload {
+  error?: string;
+  chunk?: string;
+  done?: boolean;
+}
+
+const isJsonChunkBoundaryError = (error: unknown) => (
+  error instanceof Error && error.message.startsWith('Unexpected')
+);
+
 const markdownComponents = {
-  code({ node, className, children, ...props }: any) {
-    const match = /language-(\w+)/.exec(className || '');
-    const codeText = String(children).replace(/\n$/, '');
-    const inline = !match && !codeText.includes('\n');
-    if (inline) {
-      return <code className={className} {...props}>{children}</code>;
-    }
-    return (
-      <SyntaxHighlighter
-        style={oneDark}
-        language={match?.[1] || 'c'}
-        PreTag="div"
-        customStyle={{ borderRadius: 6, fontSize: 13 }}
-      >
-        {codeText}
-      </SyntaxHighlighter>
-    );
+  code({ className, children, ...props }: React.HTMLAttributes<HTMLElement>) {
+    return <MarkdownCode className={className} {...props}>{children}</MarkdownCode>;
   },
 };
 
@@ -49,7 +45,7 @@ const KnowledgeMap: React.FC = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const convertToTreeData = (nodes: KnowledgePoint[]): any[] =>
+  const convertToTreeData = (nodes: KnowledgePoint[]): DataNode[] =>
     nodes.map((node) => ({
       title: (
         <span>
@@ -89,19 +85,20 @@ const KnowledgeMap: React.FC = () => {
         const lines = text.split('\n').filter(l => l.startsWith('data: '));
         for (const line of lines) {
           try {
-            const data = JSON.parse(line.slice(6));
+            const data = JSON.parse(line.slice(6)) as StreamPayload;
             if (data.error) throw new Error(data.error);
             if (data.chunk) { fullText += data.chunk; setStreamingText(fullText); }
             if (data.done) {
               const updated = await fetchKnowledgePoint(selectedKnowledgePoint.id);
               setSelectedKnowledgePoint(updated);
             }
-          } catch (e: any) {
-            if (e.message && !e.message.startsWith('Unexpected')) throw e;
+          } catch (error: unknown) {
+            if (!isJsonChunkBoundaryError(error)) throw error;
           }
         }
       }
-    } catch (e: any) {
+    } catch (error) {
+      const e = error as { message?: string };
       antdMessage.error(e.message || 'AI讲解生成失败');
     } finally {
       setGenerating(false);
@@ -113,13 +110,13 @@ const KnowledgeMap: React.FC = () => {
     await handleGenerateExplanation();
   };
 
-  const handleSelect = async (_selectedKeys: any, info: any) => {
+  const handleSelect = async (_selectedKeys: React.Key[], info: { node: EventDataNode<DataNode> }) => {
     if (info.node.isLeaf) {
       setKpLoading(true);
       try {
-        const kp = await fetchKnowledgePoint(info.node.key);
+        const kp = await fetchKnowledgePoint(Number(info.node.key));
         setSelectedKnowledgePoint(kp);
-      } catch (e) { /* handled by interceptor */ }
+      } catch { /* handled by interceptor */ }
       finally { setKpLoading(false); }
     } else {
       setSelectedKnowledgePoint(null);
@@ -269,8 +266,8 @@ const KnowledgeMap: React.FC = () => {
               <Button
                 type="default"
                 icon={<ArrowRightOutlined />}
-                onClick={() => navigate('/practice', {
-                  state: { knowledgePoint: selectedKnowledgePoint }
+                onClick={() => navigate('/study', {
+                  state: { knowledgePoint: selectedKnowledgePoint, tab: 'practice' }
                 })}
               >
                 练习此章节题目

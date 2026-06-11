@@ -1,45 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Row, Col } from 'antd';
-import { RobotOutlined } from '@ant-design/icons';
-import { useLocation } from 'react-router-dom';
-import ChatWindow from '../../components/AIChat/ChatWindow';
-import ModelSelector from '../../components/AIChat/ModelSelector';
-import type { KnowledgePoint } from '../../types';
+﻿import React, { Suspense, lazy, useState } from "react";
+import { Tabs } from "antd";
+import { RobotOutlined, HistoryOutlined } from "@ant-design/icons";
+import ChatWindow from "../../components/AIChat/ChatWindow";
+import ModelSelector from "../../components/AIChat/ModelSelector";
+
+const AIHistory = lazy(() => import("../AIHistory"));
+
+const Loading = () => <div style={{ textAlign: "center", padding: 40 }}>加载中...</div>;
 
 const AITutor: React.FC = () => {
-  const [provider, setProvider] = useState('deepseek');
-  const location = useLocation();
-  const [knowledgePoint, setKnowledgePoint] = useState<KnowledgePoint | null>(null);
+  const [provider, setProvider] = useState("deepseek");
+  const [activeTab, setActiveTab] = useState("chat");
 
-  useEffect(() => {
-    const state = location.state as { knowledgePoint?: KnowledgePoint } | null;
-    if (state?.knowledgePoint) {
-      setKnowledgePoint(state.knowledgePoint);
-      window.history.replaceState({}, document.title);
-    }
-  }, []);
+  const tabItems = [
+    {
+      key: "chat",
+      label: <span><RobotOutlined /> AI对话</span>,
+      children: <ChatWindow provider={provider} />,
+    },
+    {
+      key: "history",
+      label: <span><HistoryOutlined /> 历史记录</span>,
+      children: (
+        <Suspense fallback={<Loading />}>
+          <AIHistory />
+        </Suspense>
+      ),
+    },
+  ];
 
   return (
-    <Card
-      title={
-        <Row justify="space-between" align="middle" style={{ width: '100%' }}>
-          <Col>
-            <RobotOutlined style={{ marginRight: 8 }} />
-            AI 导师
-            {knowledgePoint && (
-              <span style={{ fontSize: 14, color: '#64748B', marginLeft: 12 }}>
-                正在讲解：{knowledgePoint.name}
-              </span>
-            )}
-          </Col>
-          <Col>
-            <ModelSelector value={provider} onChange={setProvider} />
-          </Col>
-        </Row>
-      }
-    >
-      <ChatWindow knowledgePoint={knowledgePoint} provider={provider} />
-    </Card>
+    <Tabs
+      activeKey={activeTab}
+      onChange={setActiveTab}
+      tabBarExtraContent={<ModelSelector value={provider} onChange={setProvider} />}
+      items={tabItems}
+      size="large"
+      tabBarStyle={{ marginBottom: 16 }}
+    />
   );
 };
 

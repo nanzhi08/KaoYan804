@@ -5,13 +5,33 @@ interface KeepAliveProps {
   children: React.ReactNode;
 }
 
-/**
- * KeepAlive container - hides inactive children via display:none
- * instead of unmounting them, preserving all React + DOM state.
- */
 const KeepAlive: React.FC<KeepAliveProps> = React.memo(({ active, children }) => {
+  const [hasActivated, setHasActivated] = React.useState(active);
+
+  React.useEffect(() => {
+    if (active) {
+      setHasActivated(true);
+    }
+  }, [active]);
+
+  if (!hasActivated) {
+    return null;
+  }
+
   return (
-    <div style={{ display: active ? 'block' : 'none' }}>
+    <div
+      aria-hidden={!active}
+      style={active
+        ? { display: 'block' }
+        : {
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          visibility: 'hidden',
+          pointerEvents: 'none',
+          zIndex: -1,
+        }}
+    >
       {children}
     </div>
   );

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, JSON, Text, ForeignKey
 from sqlalchemy.orm import relationship
-from datetime import datetime
 from ..database import Base
+from ..time_utils import utc_now_naive
 
 
 class Question(Base):
@@ -19,7 +19,7 @@ class Question(Base):
     explanation = Column(Text, default="")
     source = Column(String(200), nullable=True)
     code_snippet = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now_naive)
 
     knowledge_points = relationship("QuestionKnowledgePoint", back_populates="question", lazy="selectin")
 

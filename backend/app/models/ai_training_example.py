@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, ForeignKey
-from datetime import datetime
 from ..database import Base
+from ..time_utils import utc_now_naive
 
 
 class AITrainingExample(Base):
@@ -17,4 +17,4 @@ class AITrainingExample(Base):
     keywords = Column(Text, default="")
     usage_count = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now_naive)

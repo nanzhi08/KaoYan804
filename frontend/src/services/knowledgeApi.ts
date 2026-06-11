@@ -16,7 +16,13 @@ export async function generateAIExplanation(kpId: number): Promise<{ kp_id: numb
   return res.data;
 }
 
-export async function batchGenerateAIExplanations(): Promise<{ total_leaves: number; generated: number; errors: any[] }> {
-  const res = await api.post('/ai/explain/batch') as unknown as APIResponse<{ total_leaves: number; generated: number; errors: any[] }>;
+export interface BatchGenerateError {
+  kp_id?: number;
+  name?: string;
+  error: string;
+}
+
+export async function batchGenerateAIExplanations(): Promise<{ total_leaves: number; generated: number; errors: BatchGenerateError[] }> {
+  const res = await api.post('/ai/explain/batch') as unknown as APIResponse<{ total_leaves: number; generated: number; errors: BatchGenerateError[] }>;
   return res.data;
 }

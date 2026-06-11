@@ -1,9 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional
 
 
 class KnowledgePointOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     parent_id: Optional[int] = None
     name: str
@@ -16,13 +18,7 @@ class KnowledgePointOut(BaseModel):
     ai_explanation: str = ""
     children: list["KnowledgePointOut"] = []
 
-    class Config:
-        from_attributes = True
-
 
 class KnowledgePointDetail(KnowledgePointOut):
     ai_explanation: str = ""
     created_at: datetime
-
-    class Config:
-        from_attributes = True

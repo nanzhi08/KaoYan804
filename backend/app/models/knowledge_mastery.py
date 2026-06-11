@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Float, DateTime, ForeignKey, String
 from sqlalchemy.orm import relationship
-from datetime import datetime
 from ..database import Base
+from ..time_utils import utc_now_naive
 
 
 class KnowledgeMastery(Base):
@@ -17,6 +17,6 @@ class KnowledgeMastery(Base):
     correct_attempts = Column(Integer, default=0)
     last_reviewed_at = Column(DateTime, nullable=True)
     next_review_at = Column(DateTime, nullable=True)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime, default=utc_now_naive, onupdate=utc_now_naive)
 
     knowledge_point = relationship("KnowledgePoint", back_populates="mastery")

@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from importlib import import_module
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -13,6 +14,15 @@ from .database import init_db
 FRONTEND_DIR = Path(__file__).parent.parent.parent / "frontend" / "dist"
 
 
+def _load_seed_all():
+    try:
+        return import_module("seed.seed_all").seed_all
+    except ModuleNotFoundError as error:
+        if error.name != "seed":
+            raise
+    return None
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
@@ -20,8 +30,9 @@ async def lifespan(app: FastAPI):
 
     # Auto-seed on first startup (safe to call - skips if data exists)
     try:
-        from seed.seed_all import seed_all
-        await seed_all()
+        seed_all = _load_seed_all()
+        if seed_all is not None:
+            await seed_all()
     except Exception as e:
         print(f"[Seed] Skipping auto-seed: {e}")
 
@@ -56,7 +67,12 @@ app.include_router(progress.router)
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "ok", "app": settings.APP_NAME}
+    return {
+        "status": "ok",
+        "app": settings.APP_NAME,
+        "mode": settings.APP_MODE,
+        "user_label": settings.APP_USER_LABEL,
+    }
 
 
 # --- SPA fallback: serve frontend static files in production ---

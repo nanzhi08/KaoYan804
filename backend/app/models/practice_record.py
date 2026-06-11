@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
-from datetime import datetime
 from ..database import Base
+from ..time_utils import utc_now_naive
 
 
 class PracticeRecord(Base):
@@ -13,6 +13,6 @@ class PracticeRecord(Base):
     is_correct = Column(Boolean, default=False)
     time_spent = Column(Integer, default=0)  # seconds
     practice_mode = Column(String(20), default="random")  # "random" | "chapter" | "review" | "exam"
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now_naive)
 
     question = relationship("Question", lazy="selectin")

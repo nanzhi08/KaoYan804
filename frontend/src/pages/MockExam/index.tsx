@@ -39,7 +39,7 @@ const MockExam: React.FC = () => {
       setSubmitted(false);
       setScore(null);
       setCurrentIndex(0);
-    } catch (e) { /* handled by interceptor */ }
+    } catch { /* handled by interceptor */ }
     finally { setLoading(false); }
   };
 
@@ -51,7 +51,7 @@ const MockExam: React.FC = () => {
       const submitRes = await api.post(`/exam/${exam.exam_id}/submit`, answers);
       setScore(submitRes.data.score);
       setSubmitted(true);
-    } catch (e) { /* handled by interceptor */ }
+    } catch { /* handled by interceptor */ }
     finally { setLoading(false); }
   };
 
