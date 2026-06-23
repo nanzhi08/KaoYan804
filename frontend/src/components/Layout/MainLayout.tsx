@@ -24,12 +24,12 @@ const MockExam = lazy(() => import("../../pages/MockExam"));
 const Documents = lazy(() => import("../../pages/Documents"));
 
 const menuItems = [
-  { key: "/", icon: <DashboardOutlined />, label: "学习仪表盘" },
-  { key: "/study", icon: <ReadOutlined />, label: "学习中心" },
-  { key: "/review", icon: <RiseOutlined />, label: "复习进度" },
-  { key: "/ai-tutor", icon: <RobotOutlined />, label: "AI助手" },
+  { key: "/", icon: <DashboardOutlined />, label: "学习概览" },
+  { key: "/study", icon: <ReadOutlined />, label: "学习练习" },
+  { key: "/review", icon: <RiseOutlined />, label: "复习巩固" },
+  { key: "/ai-tutor", icon: <RobotOutlined />, label: "AI辅导" },
   { key: "/mock-exam", icon: <FormOutlined />, label: "模拟考试" },
-  { key: "/documents", icon: <FileTextOutlined />, label: "资料管理" },
+  { key: "/documents", icon: <FileTextOutlined />, label: "文档资料" },
 ];
 
 interface PageConfig {

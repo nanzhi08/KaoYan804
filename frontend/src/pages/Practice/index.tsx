@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+﻿import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   Card, Select, Button, Space, Radio, Input, Tag, Spin, Empty, Result, Divider,
@@ -91,7 +91,7 @@ const PracticeConfig: React.FC<{
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (location.pathname !== '/practice') return;
+    if (location.pathname !== '/study') return;
 
     const nextState = location.state as PracticeRouteState | null;
     const nextIds = getRouteKnowledgePointIds(nextState);

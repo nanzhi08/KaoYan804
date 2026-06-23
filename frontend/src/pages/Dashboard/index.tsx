@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Button, Card, Col, Empty, Progress, Row, Space, Spin, Statistic, Tag } from 'antd';
 import {
   BookOutlined,
@@ -42,8 +42,9 @@ const Dashboard: React.FC = () => {
   const dailyTarget = overview?.daily_target ?? 10;
   const targetProgress = Math.min(100, Math.round((todayAttempts / dailyTarget) * 100));
   const startKnowledgePointPractice = (ch: ChapterProgress) => {
-    navigate('/practice', {
+    navigate('/study', {
       state: {
+        tab: 'practice',
         knowledgePoint: { id: ch.id, part: ch.part, chapter: ch.chapter, name: ch.name },
         knowledgePointIds: [ch.id],
       },

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+﻿import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Alert,
@@ -97,7 +97,7 @@ const WrongRecords: React.FC = () => {
 
     reset();
     setQuestions(pendingWrongQuestions);
-    navigate('/study', { state: { autoStart: true, mode: 'wrong' } });
+    navigate('/study', { state: { tab: 'practice', autoStart: true, mode: 'wrong' } });
   }, [navigate, pendingWrongQuestions, reset, setQuestions]);
 
   const handleOpenDetail = useCallback(async (record: PracticeRecord) => {
