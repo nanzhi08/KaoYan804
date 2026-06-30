@@ -12,7 +12,7 @@ from .config import settings
 from .database import get_db
 from .models.user import User
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256", "bcrypt"], deprecated=["bcrypt"])
 security = HTTPBearer()
 
 

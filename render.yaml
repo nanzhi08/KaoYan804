@@ -14,6 +14,8 @@ services:
         value: "8000"
       - key: ENABLE_CORS
         value: "false"
+      - key: DATA_DIR
+        value: "/data"
     disk:
       name: data
       mountPath: /data

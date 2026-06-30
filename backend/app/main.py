@@ -54,7 +54,7 @@ async def lifespan(app: FastAPI):
                 await session.commit()
                 print(f"[Seed] Created admin user: {settings.INIT_ADMIN_USERNAME}")
     except Exception as e:
-        print(f"[Seed] Admin seed skipped: {e}")
+        print(f"[Seed] Admin seed ERROR ({type(e).__name__}): {e}")
 
     yield
 
