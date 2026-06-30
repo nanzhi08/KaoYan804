@@ -19,9 +19,14 @@ const LoginPage: React.FC = () => {
       message.success("登录成功");
       navigate("/", { replace: true });
     } catch (e: unknown) {
-      const msg = (e as { response?: { data?: { message?: string; detail?: string } } })?.response?.data?.message
-        || (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail
-        || "登录失败";
+      let msg = "登录失败";
+      if (e instanceof Error) {
+        msg = e.message || msg;
+      } else {
+        msg = (e as { response?: { data?: { message?: string; detail?: string } } })?.response?.data?.message
+          || (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+          || msg;
+      }
       message.error(msg);
     } finally {
       setLoading(false);

@@ -14,6 +14,28 @@ FRONTEND_DIR = os.path.join(ROOT, "frontend")
 processes = []
 
 
+def _kill_port(port: int) -> None:
+    """Kill any process listening on the given port to prevent conflicts."""
+    try:
+        out = subprocess.check_output(
+            ["netstat", "-ano"], text=True, errors="replace"
+        )
+        pids = set()
+        for line in out.splitlines():
+            if f":{port} " in line and "LISTENING" in line:
+                pid = line.strip().split()[-1]
+                pids.add(pid)
+        for pid in pids:
+            subprocess.run(
+                ["taskkill", "/F", "/PID", pid],
+                capture_output=True, text=True, errors="replace",
+            )
+        if pids:
+            print(f"  [清理] 已释放端口 {port} (终止 {len(pids)} 个旧进程)")
+    except Exception:
+        pass
+
+
 def main():
     # 强制使用 UTF-8 避免 GBK 乱码
     if sys.stdout.encoding != "utf-8":
@@ -23,6 +45,10 @@ def main():
     print("  考研804知识库系统 - 一键启动")
     print("=" * 50)
     print()
+
+    # 清理残留端口，避免 502 Bad Gateway
+    _kill_port(8000)
+    _kill_port(5173)
 
     # 启动后端
     print("[1/3] 启动后端服务 (FastAPI :8000)...")

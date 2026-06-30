@@ -69,15 +69,20 @@ function shouldShowErrorToast(key: string): boolean {
 // --- Unified response interceptor ---
 api.interceptors.response.use(
   (response) => {
-    // Check for business-logic 401
+    // Pass-through success (code 0 or undefined)
+    if (response.data?.code === 0 || response.data?.code === undefined) {
+      return response.data;
+    }
+    // Handle business-logic 401
     if (response.data?.code === 401) {
       localStorage.removeItem("token");
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";
       }
-      return Promise.reject(new Error("Unauthorized"));
     }
-    return response.data;
+    // Reject all non-zero business codes with server message
+    const serverMsg = response.data?.message || "请求失败";
+    return Promise.reject(new Error(serverMsg));
   },
   (error) => {
     // Handle HTTP 401
