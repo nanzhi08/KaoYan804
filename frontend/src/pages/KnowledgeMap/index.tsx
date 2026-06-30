@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Tree, Spin, Empty, Descriptions, Tag, Button, Row, Col, Space, Modal, message as antdMessage } from 'antd';
+import { Card, Tree, Spin, Empty, Descriptions, Tag, Button, Row, Col, Space, Modal, App } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { RobotOutlined, BookOutlined, ArrowRightOutlined, ReloadOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
@@ -37,6 +37,7 @@ const KnowledgeMap: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const { selectedKnowledgePoint, setSelectedKnowledgePoint } = useAppStore();
   const navigate = useNavigate();
+  const { message } = App.useApp();
 
   useEffect(() => {
     fetchKnowledgePoints()
@@ -69,12 +70,17 @@ const KnowledgeMap: React.FC = () => {
     if (!selectedKnowledgePoint) return;
     setGenerating(true);
     setStreamingText('');
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
     try {
       const params = new URLSearchParams({ kp_id: String(selectedKnowledgePoint.id), provider: 'deepseek' });
-      const response = await fetch(`/api/ai/explain/save-stream?${params}`, { method: 'POST' });
-      if (!response.ok) throw new Error(`Server error (${response.status})`);
 
-      const reader = response.body?.getReader();
+      // Step 1: Stream the AI explanation via SSE
+      const streamResponse = await fetch(`/api/ai/explain?${params}`, { method: 'POST', headers });
+      if (!streamResponse.ok) throw new Error(`Server error (${streamResponse.status})`);
+
+      const reader = streamResponse.body?.getReader();
       const decoder = new TextDecoder();
       let fullText = '';
 
@@ -88,18 +94,19 @@ const KnowledgeMap: React.FC = () => {
             const data = JSON.parse(line.slice(6)) as StreamPayload;
             if (data.error) throw new Error(data.error);
             if (data.chunk) { fullText += data.chunk; setStreamingText(fullText); }
-            if (data.done) {
-              const updated = await fetchKnowledgePoint(selectedKnowledgePoint.id);
-              setSelectedKnowledgePoint(updated);
-            }
           } catch (error: unknown) {
             if (!isJsonChunkBoundaryError(error)) throw error;
           }
         }
       }
+
+      // Step 2: Save the generated explanation to DB
+      await fetch(`/api/ai/explain/save?${params}`, { method: 'POST', headers });
+      const updated = await fetchKnowledgePoint(selectedKnowledgePoint.id);
+      setSelectedKnowledgePoint(updated);
     } catch (error) {
       const e = error as { message?: string };
-      antdMessage.error(e.message || 'AI讲解生成失败');
+      message.error(e.message || 'AI讲解生成失败');
     } finally {
       setGenerating(false);
       setStreamingText('');

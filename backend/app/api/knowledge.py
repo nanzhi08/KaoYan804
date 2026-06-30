@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
+from ..dependencies import get_current_user
 from ..schemas.common import APIResponse
 from ..schemas.knowledge import KnowledgePointDetail
 from ..services import knowledge_service
@@ -10,13 +11,13 @@ router = APIRouter(prefix="/api/knowledge-points", tags=["知识管理"])
 
 
 @router.get("")
-async def list_knowledge_points(db: AsyncSession = Depends(get_db)):
+async def list_knowledge_points(db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
     tree = await knowledge_service.get_knowledge_tree(db)
     return APIResponse(data=tree)
 
 
 @router.get("/{kp_id}")
-async def get_knowledge_point(kp_id: int, db: AsyncSession = Depends(get_db)):
+async def get_knowledge_point(kp_id: int, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
     kp = await knowledge_service.get_knowledge_point(db, kp_id)
     if not kp:
         return APIResponse(code=404, message="知识点不存在")

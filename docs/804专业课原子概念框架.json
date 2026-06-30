@@ -1,0 +1,676 @@
+{
+  "meta": {
+    "name": "804专业课原子概念框架",
+    "version": "2026-06-20",
+    "status": "design_only",
+    "notes_writeback": false,
+    "scope": "上海第二工业大学 804《数据结构与高级程序设计》",
+    "entry_targets": [
+      "C_MOC",
+      "DS_MOC"
+    ],
+    "source_files": [
+      "backend/seed/seed_knowledge.py",
+      "backend/seed/seed_2024_exam.py",
+      "scripts/generate_specialty_notes.py"
+    ]
+  },
+  "subjects": {
+    "C_MOC": {
+      "subject_name": "C语言",
+      "exam_buckets": [
+        {
+          "name": "选择辨析",
+          "system_question_types": [
+            "single_choice"
+          ],
+          "knowledge_area_refs": [
+            "程序基础与数据类型",
+            "运算与表达式",
+            "流程控制",
+            "数组与算法基础",
+            "函数与递归",
+            "指针与字符串",
+            "结构体",
+            "输入输出与文件"
+          ]
+        },
+        {
+          "name": "程序阅读",
+          "system_question_types": [
+            "program_reading"
+          ],
+          "knowledge_area_refs": [
+            "运算与表达式",
+            "流程控制",
+            "函数与递归",
+            "指针与字符串",
+            "结构体",
+            "输入输出与文件"
+          ]
+        },
+        {
+          "name": "程序填空/改错",
+          "system_question_types": [
+            "fill_blank"
+          ],
+          "knowledge_area_refs": [
+            "运算与表达式",
+            "流程控制",
+            "数组与算法基础",
+            "函数与递归",
+            "指针与字符串",
+            "结构体",
+            "输入输出与文件"
+          ]
+        },
+        {
+          "name": "编程题",
+          "system_question_types": [
+            "programming"
+          ],
+          "knowledge_area_refs": [
+            "流程控制",
+            "数组与算法基础",
+            "函数与递归",
+            "指针与字符串",
+            "结构体",
+            "输入输出与文件"
+          ]
+        }
+      ],
+      "future_note_fields": [
+        "教材出处",
+        "常见陷阱",
+        "典型题型",
+        "关联真题"
+      ],
+      "knowledge_areas": [
+        {
+          "name": "程序基础与数据类型",
+          "chapter_refs": {
+            "syllabus": [
+              "1.1"
+            ],
+            "system_chapter": "1.1 程序基本结构与数据类型",
+            "textbook_hint": [
+              "第1章 程序逻辑与C语言概述",
+              "第2章 C语言基础知识"
+            ]
+          },
+          "concepts": [
+            "C程序基本结构",
+            "标识符与关键字",
+            "常量与变量",
+            "整型",
+            "实型",
+            "字符型",
+            "变量初始化",
+            "作用域",
+            "局部变量与全局变量",
+            "静态局部变量"
+          ]
+        },
+        {
+          "name": "运算与表达式",
+          "chapter_refs": {
+            "syllabus": [
+              "1.2"
+            ],
+            "system_chapter": "1.2 运算符与表达式",
+            "textbook_hint": [
+              "第2章 C语言基础知识",
+              "第6章 回顾数据类型和表达式"
+            ]
+          },
+          "concepts": [
+            "算术运算符",
+            "关系运算符",
+            "逻辑运算符",
+            "自增自减",
+            "逗号表达式",
+            "运算符优先级",
+            "条件表达式",
+            "类型转换"
+          ]
+        },
+        {
+          "name": "流程控制",
+          "chapter_refs": {
+            "syllabus": [
+              "1.3"
+            ],
+            "system_chapter": "1.3 循环结构与分支结构",
+            "textbook_hint": [
+              "第3章 流程控制结构"
+            ]
+          },
+          "concepts": [
+            "if语句",
+            "if-else配对规则",
+            "switch语句",
+            "for循环",
+            "while循环",
+            "do-while循环",
+            "break语句",
+            "continue语句",
+            "枚举法"
+          ]
+        },
+        {
+          "name": "数组与算法基础",
+          "chapter_refs": {
+            "syllabus": [
+              "1.4"
+            ],
+            "system_chapter": "1.4 数组与结构体",
+            "textbook_hint": [
+              "第4章 数组"
+            ]
+          },
+          "concepts": [
+            "一维数组定义",
+            "数组下标",
+            "数组初始化",
+            "二维数组定义",
+            "二维数组存储与访问",
+            "筛法",
+            "冒泡排序思想",
+            "选择排序思想"
+          ]
+        },
+        {
+          "name": "函数与递归",
+          "chapter_refs": {
+            "syllabus": [
+              "1.5"
+            ],
+            "system_chapter": "1.5 函数、递推与递归",
+            "textbook_hint": [
+              "第5章 函数"
+            ]
+          },
+          "concepts": [
+            "函数声明",
+            "函数定义",
+            "函数调用",
+            "形参与实参",
+            "值传递",
+            "递推",
+            "递归定义",
+            "递归出口"
+          ]
+        },
+        {
+          "name": "指针与字符串",
+          "chapter_refs": {
+            "syllabus": [
+              "1.6"
+            ],
+            "system_chapter": "1.6 指针与引用",
+            "textbook_hint": [
+              "第6章 指针"
+            ]
+          },
+          "concepts": [
+            "指针定义",
+            "取地址运算",
+            "解引用",
+            "指针与一维数组",
+            "数组名含义",
+            "字符串常量",
+            "字符数组与字符串结束符",
+            "strlen",
+            "strcmp"
+          ]
+        },
+        {
+          "name": "结构体",
+          "chapter_refs": {
+            "syllabus": [
+              "1.4"
+            ],
+            "system_chapter": "1.4 数组与结构体",
+            "textbook_hint": [
+              "第7章 结构体和共用体"
+            ]
+          },
+          "concepts": [
+            "结构体定义",
+            "结构体变量",
+            "结构体数组",
+            "结构体成员访问",
+            "结构体指针",
+            "箭头运算符"
+          ]
+        },
+        {
+          "name": "输入输出与文件",
+          "chapter_refs": {
+            "syllabus": [
+              "1.7"
+            ],
+            "system_chapter": "1.7 流与文件操作",
+            "textbook_hint": [
+              "第9章 文件"
+            ]
+          },
+          "concepts": [
+            "scanf",
+            "printf格式控制",
+            "字符输入输出",
+            "文件指针",
+            "文件打开关闭",
+            "文件读写基础"
+          ]
+        }
+      ],
+      "mainline_exclusions": [
+        "旧考纲沿用的“引用”表述不作为 C 主干知识点"
+      ]
+    },
+    "DS_MOC": {
+      "subject_name": "数据结构",
+      "exam_buckets": [
+        {
+          "name": "选择辨析",
+          "system_question_types": [
+            "single_choice"
+          ],
+          "knowledge_area_refs": [
+            "绪论与算法分析",
+            "线性表",
+            "栈与队列",
+            "串数组广义表",
+            "树与二叉树",
+            "图",
+            "查找",
+            "排序"
+          ]
+        },
+        {
+          "name": "简答题",
+          "system_question_types": [
+            "short_answer"
+          ],
+          "knowledge_area_refs": [
+            "绪论与算法分析",
+            "线性表",
+            "栈与队列",
+            "串数组广义表",
+            "树与二叉树",
+            "图",
+            "查找",
+            "排序"
+          ]
+        },
+        {
+          "name": "计算题",
+          "system_question_types": [
+            "calculation"
+          ],
+          "knowledge_area_refs": [
+            "串数组广义表",
+            "树与二叉树",
+            "图",
+            "查找",
+            "排序"
+          ]
+        },
+        {
+          "name": "分析题",
+          "system_question_types": [
+            "analysis"
+          ],
+          "knowledge_area_refs": [
+            "线性表",
+            "栈与队列",
+            "树与二叉树",
+            "图",
+            "查找",
+            "排序"
+          ]
+        },
+        {
+          "name": "编程题",
+          "system_question_types": [
+            "programming"
+          ],
+          "knowledge_area_refs": [
+            "线性表",
+            "栈与队列",
+            "树与二叉树",
+            "图",
+            "查找",
+            "排序"
+          ]
+        }
+      ],
+      "future_note_fields": [
+        "公式",
+        "复杂度",
+        "易错点",
+        "典型计算题",
+        "相关算法题"
+      ],
+      "knowledge_areas": [
+        {
+          "name": "绪论与算法分析",
+          "chapter_refs": {
+            "syllabus": [
+              "2.1"
+            ],
+            "system_chapter": "2.1 数据结构与算法基础概念",
+            "textbook_hint": [
+              "第1章 绪论"
+            ]
+          },
+          "concepts": [
+            "数据",
+            "数据元素",
+            "数据项",
+            "逻辑结构",
+            "存储结构",
+            "抽象数据类型",
+            "算法五特性",
+            "时间复杂度",
+            "空间复杂度"
+          ]
+        },
+        {
+          "name": "线性表",
+          "chapter_refs": {
+            "syllabus": [
+              "2.2"
+            ],
+            "system_chapter": "2.2 线性表",
+            "textbook_hint": [
+              "第2章 线性表"
+            ]
+          },
+          "concepts": [
+            "线性表定义",
+            "顺序表存储",
+            "顺序表插入",
+            "顺序表删除",
+            "单链表结点",
+            "头结点",
+            "单链表插入",
+            "单链表删除",
+            "循环链表",
+            "双向链表",
+            "顺序表与链表比较"
+          ]
+        },
+        {
+          "name": "栈与队列",
+          "chapter_refs": {
+            "syllabus": [
+              "2.3"
+            ],
+            "system_chapter": "2.3 栈与队列",
+            "textbook_hint": [
+              "第3章 栈和队列"
+            ]
+          },
+          "concepts": [
+            "栈定义",
+            "顺序栈",
+            "链栈",
+            "出栈序列判定",
+            "递归与栈关系",
+            "队列定义",
+            "循环队列判空",
+            "循环队列判满",
+            "链队列"
+          ]
+        },
+        {
+          "name": "串数组广义表",
+          "chapter_refs": {
+            "syllabus": [
+              "2.4"
+            ],
+            "system_chapter": "2.4 数组与特殊矩阵",
+            "textbook_hint": [
+              "第4章 串、数组和广义表"
+            ]
+          },
+          "concepts": [
+            "串定义",
+            "模式匹配",
+            "数组地址计算",
+            "二维数组按行存储",
+            "二维数组按列存储",
+            "特殊矩阵压缩存储",
+            "稀疏矩阵三元组表示",
+            "广义表定义"
+          ]
+        },
+        {
+          "name": "树与二叉树",
+          "chapter_refs": {
+            "syllabus": [
+              "2.5"
+            ],
+            "system_chapter": "2.5 树与二叉树",
+            "textbook_hint": [
+              "第5章 树与二叉树"
+            ]
+          },
+          "concepts": [
+            "树的基本术语",
+            "二叉树定义",
+            "二叉树性质",
+            "完全二叉树性质",
+            "二叉树顺序存储",
+            "二叉链表",
+            "前序遍历",
+            "中序遍历",
+            "后序遍历",
+            "层序遍历",
+            "由遍历序列还原二叉树",
+            "线索二叉树",
+            "树森林二叉树转换",
+            "哈夫曼树",
+            "哈夫曼编码"
+          ]
+        },
+        {
+          "name": "图",
+          "chapter_refs": {
+            "syllabus": [
+              "2.6"
+            ],
+            "system_chapter": "2.6 图",
+            "textbook_hint": [
+              "第6章 图"
+            ]
+          },
+          "concepts": [
+            "图的基本术语",
+            "邻接矩阵",
+            "邻接表",
+            "图的深度优先遍历",
+            "图的广度优先遍历",
+            "最小生成树",
+            "Prim算法",
+            "Kruskal算法",
+            "最短路径",
+            "Dijkstra算法",
+            "Floyd算法",
+            "拓扑排序",
+            "AOE网",
+            "关键路径"
+          ]
+        },
+        {
+          "name": "查找",
+          "chapter_refs": {
+            "syllabus": [
+              "2.7"
+            ],
+            "system_chapter": "2.7 查找",
+            "textbook_hint": [
+              "第7章 查找"
+            ]
+          },
+          "concepts": [
+            "静态查找",
+            "动态查找",
+            "顺序查找",
+            "折半查找",
+            "分块查找",
+            "二叉排序树",
+            "哈希表",
+            "哈希函数构造",
+            "线性探测法",
+            "冲突处理"
+          ]
+        },
+        {
+          "name": "排序",
+          "chapter_refs": {
+            "syllabus": [
+              "2.8"
+            ],
+            "system_chapter": "2.8 内部排序",
+            "textbook_hint": [
+              "第8章 排序"
+            ]
+          },
+          "concepts": [
+            "排序稳定性",
+            "直接插入排序",
+            "折半插入排序",
+            "希尔排序",
+            "冒泡排序",
+            "快速排序",
+            "简单选择排序",
+            "堆排序",
+            "归并排序",
+            "基数排序",
+            "排序趟数分析",
+            "排序算法比较"
+          ]
+        }
+      ],
+      "mainline_exclusions": [
+        "平衡二叉树",
+        "B树",
+        "B+树",
+        "外部排序"
+      ]
+    }
+  },
+  "organization_rules": [
+    "同一概念只保留一个主入口，MOC 的考法视图通过引用知识域实现复用。",
+    "若一个概念既是定义又常作为计算题前置，仍只建一个原子点，通过后续链接或属性解决复用。",
+    "超出 804 考纲但教材出现的内容默认不进主干框架，如后续需要可放入扩展区。",
+    "数据结构主干以考纲为裁剪标准，平衡二叉树、B树、B+树、外部排序暂不纳入主干。",
+    "本阶段只交付框架设计与校验材料，不直接写入考研专业课笔记目录下的 C_MOC.md 和 DS_MOC.md。"
+  ],
+  "sample_question_mappings": [
+    {
+      "source": "2024真题",
+      "part": "data_structure",
+      "question_type": "single_choice",
+      "question_contains": "最常用的操作是在最后一个元素之后插入一个元素和删除第一个元素",
+      "mapped_concepts": [
+        "循环链表",
+        "顺序表与链表比较"
+      ]
+    },
+    {
+      "source": "2024真题",
+      "part": "data_structure",
+      "question_type": "calculation",
+      "question_contains": "完全二叉树具有1000个结点",
+      "mapped_concepts": [
+        "完全二叉树性质",
+        "二叉树性质"
+      ]
+    },
+    {
+      "source": "2024真题",
+      "part": "data_structure",
+      "question_type": "analysis",
+      "question_contains": "关键路径分析",
+      "mapped_concepts": [
+        "AOE网",
+        "关键路径"
+      ]
+    },
+    {
+      "source": "2024真题",
+      "part": "data_structure",
+      "question_type": "programming",
+      "question_contains": "SearchBST",
+      "mapped_concepts": [
+        "二叉链表",
+        "递归与栈关系"
+      ]
+    },
+    {
+      "source": "2024真题",
+      "part": "C_programming",
+      "question_type": "single_choice",
+      "question_contains": "else和之前哪个if配对",
+      "mapped_concepts": [
+        "if-else配对规则",
+        "if语句"
+      ]
+    },
+    {
+      "source": "2024真题",
+      "part": "C_programming",
+      "question_type": "fill_blank",
+      "question_contains": "斐波那契数列",
+      "mapped_concepts": [
+        "递推",
+        "for循环"
+      ]
+    },
+    {
+      "source": "2024真题",
+      "part": "C_programming",
+      "question_type": "program_reading",
+      "question_contains": "switch(x)",
+      "mapped_concepts": [
+        "switch语句",
+        "break语句"
+      ]
+    },
+    {
+      "source": "2024真题",
+      "part": "C_programming",
+      "question_type": "program_reading",
+      "question_contains": "static int a = 3",
+      "mapped_concepts": [
+        "静态局部变量",
+        "函数调用"
+      ]
+    },
+    {
+      "source": "2024真题",
+      "part": "C_programming",
+      "question_type": "program_reading",
+      "question_contains": "int x; int f();",
+      "mapped_concepts": [
+        "作用域",
+        "局部变量与全局变量"
+      ]
+    },
+    {
+      "source": "2024真题",
+      "part": "C_programming",
+      "question_type": "programming",
+      "question_contains": "循环左移",
+      "mapped_concepts": [
+        "一维数组定义",
+        "数组下标",
+        "函数定义"
+      ]
+    }
+  ]
+}

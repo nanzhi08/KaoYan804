@@ -5,21 +5,19 @@ from sqlalchemy import select, func, or_
 from datetime import datetime, timedelta
 
 from ..database import get_db
+from ..dependencies import get_current_user
+from ..models.user import User
 from ..schemas.common import APIResponse
 from ..models.knowledge_point import KnowledgePoint
 from ..models.knowledge_mastery import KnowledgeMastery
 from ..models.question import Question, QuestionKnowledgePoint
 
-router = APIRouter(prefix="/api/review", tags=["复习计划"])
+router = APIRouter(prefix="/api/review", tags=["复习"])
 
 
 def sm2_algorithm(mastery: KnowledgeMastery, quality: int):
-    """SM-2 interval repetition algorithm
-    quality: 0-5, where 0=complete blackout, 5=perfect response
-    """
     if quality < 0 or quality > 5:
         raise ValueError("quality must be 0-5")
-
     mastery.mastery_level = mastery.mastery_level or 0.0
     mastery.ease_factor = mastery.ease_factor or 2.5
     mastery.interval_days = mastery.interval_days or 0
@@ -27,7 +25,6 @@ def sm2_algorithm(mastery: KnowledgeMastery, quality: int):
     mastery.total_attempts = mastery.total_attempts or 0
     mastery.correct_attempts = mastery.correct_attempts or 0
     now = datetime.now()
-
     if quality >= 3:
         if mastery.repetitions == 0:
             mastery.interval_days = 1
@@ -39,7 +36,6 @@ def sm2_algorithm(mastery: KnowledgeMastery, quality: int):
     else:
         mastery.repetitions = 0
         mastery.interval_days = 1
-
     mastery.ease_factor = max(1.3, mastery.ease_factor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)))
     mastery.mastery_level = min(1.0, (mastery.mastery_level * 0.7 + (quality / 5.0) * 0.3))
     mastery.last_reviewed_at = now
@@ -51,27 +47,28 @@ def sm2_algorithm(mastery: KnowledgeMastery, quality: int):
 
 
 @router.get("/due")
-async def get_due_reviews(db: AsyncSession = Depends(get_db)):
-    """Get due review knowledge points"""
+async def get_due_reviews(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     try:
         now = datetime.now()
         result = await db.execute(
             select(KnowledgeMastery)
-            .where(or_(KnowledgeMastery.next_review_at.is_(None), KnowledgeMastery.next_review_at <= now))
+            .where(
+                KnowledgeMastery.user_id == current_user.id,
+                or_(KnowledgeMastery.next_review_at.is_(None), KnowledgeMastery.next_review_at <= now),
+            )
             .order_by(KnowledgeMastery.next_review_at.isnot(None), KnowledgeMastery.next_review_at)
             .limit(20)
         )
         due_items = result.scalars().all()
-
         due_data = []
         for mastery in due_items:
-            kp_result = await db.execute(
-                select(KnowledgePoint).where(KnowledgePoint.id == mastery.knowledge_point_id)
-            )
+            kp_result = await db.execute(select(KnowledgePoint).where(KnowledgePoint.id == mastery.knowledge_point_id))
             kp = kp_result.scalar_one_or_none()
             if not kp:
                 continue
-
             q_result = await db.execute(
                 select(Question)
                 .join(QuestionKnowledgePoint, Question.id == QuestionKnowledgePoint.question_id)
@@ -79,13 +76,9 @@ async def get_due_reviews(db: AsyncSession = Depends(get_db)):
                 .limit(1)
             )
             question = q_result.scalar_one_or_none()
-
             due_data.append({
-                "mastery_id": mastery.id,
-                "knowledge_point_id": kp.id,
-                "name": kp.name,
-                "chapter": kp.chapter,
-                "part": kp.part,
+                "mastery_id": mastery.id, "knowledge_point_id": kp.id,
+                "name": kp.name, "chapter": kp.chapter, "part": kp.part,
                 "mastery_level": round((mastery.mastery_level or 0.0) * 100, 1),
                 "ease_factor": round(mastery.ease_factor or 2.5, 2),
                 "interval_days": mastery.interval_days or 0,
@@ -97,32 +90,31 @@ async def get_due_reviews(db: AsyncSession = Depends(get_db)):
                     "type": question.type,
                 } if question else None,
             })
-
-        return APIResponse(data={
-            "due_count": len(due_data),
-            "items": due_data,
-        })
+        return APIResponse(data={"due_count": len(due_data), "items": due_data})
     except Exception:
         logging.getLogger(__name__).exception("get_due_reviews failed")
         raise HTTPException(status_code=500, detail="review data query failed")
 
 
 @router.post("/{mastery_id}/review")
-async def submit_review(mastery_id: int, quality: int, db: AsyncSession = Depends(get_db)):
-    """Submit review rating, update SM-2 parameters"""
+async def submit_review(
+    mastery_id: int, quality: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     if quality < 0 or quality > 5:
         raise HTTPException(status_code=400, detail="quality must be 0-5")
-
     result = await db.execute(
-        select(KnowledgeMastery).where(KnowledgeMastery.id == mastery_id)
+        select(KnowledgeMastery).where(
+            KnowledgeMastery.id == mastery_id,
+            KnowledgeMastery.user_id == current_user.id,
+        )
     )
     mastery = result.scalar_one_or_none()
     if not mastery:
         raise HTTPException(status_code=404, detail="mastery record not found")
-
     mastery = sm2_algorithm(mastery, quality)
     await db.commit()
-
     return APIResponse(data={
         "mastery_id": mastery.id,
         "mastery_level": round((mastery.mastery_level or 0.0) * 100, 1),
@@ -134,41 +126,39 @@ async def submit_review(mastery_id: int, quality: int, db: AsyncSession = Depend
 
 
 @router.get("/stats")
-async def review_stats(db: AsyncSession = Depends(get_db)):
-    """Review statistics overview"""
+async def review_stats(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     try:
         now = datetime.now()
-
-        total_result = await db.execute(select(func.count(KnowledgeMastery.id)))
+        total_result = await db.execute(
+            select(func.count(KnowledgeMastery.id)).where(KnowledgeMastery.user_id == current_user.id)
+        )
         total = total_result.scalar()
-
         due_result = await db.execute(
-            select(func.count(KnowledgeMastery.id))
-            .where(or_(KnowledgeMastery.next_review_at.is_(None), KnowledgeMastery.next_review_at <= now))
+            select(func.count(KnowledgeMastery.id)).where(
+                KnowledgeMastery.user_id == current_user.id,
+                or_(KnowledgeMastery.next_review_at.is_(None), KnowledgeMastery.next_review_at <= now),
+            )
         )
         due_now = due_result.scalar()
-
-        avg_result = await db.execute(select(func.avg(KnowledgeMastery.mastery_level)))
+        avg_result = await db.execute(
+            select(func.avg(KnowledgeMastery.mastery_level)).where(KnowledgeMastery.user_id == current_user.id)
+        )
         avg_mastery = round((avg_result.scalar() or 0) * 100, 1)
-
         week_later = now + timedelta(days=7)
         week_result = await db.execute(
-            select(func.count(KnowledgeMastery.id))
-            .where(or_(KnowledgeMastery.next_review_at.is_(None), KnowledgeMastery.next_review_at <= week_later))
+            select(func.count(KnowledgeMastery.id)).where(
+                KnowledgeMastery.user_id == current_user.id,
+                or_(KnowledgeMastery.next_review_at.is_(None), KnowledgeMastery.next_review_at <= week_later),
+            )
         )
         due_this_week = week_result.scalar()
-
-        if due_now > 0:
-            msg = f"{due_now} knowledge points due, {due_this_week} this week"
-        else:
-            msg = "No due reviews, keep it up!"
-
+        msg = f"{due_now} knowledge points due, {due_this_week} this week" if due_now > 0 else "No due reviews, keep it up!"
         return APIResponse(data={
-            "total_knowledge_points": total,
-            "average_mastery": avg_mastery,
-            "due_now": due_now,
-            "due_this_week": due_this_week,
-            "message": msg,
+            "total_knowledge_points": total, "average_mastery": avg_mastery,
+            "due_now": due_now, "due_this_week": due_this_week, "message": msg,
         })
     except Exception:
         logging.getLogger(__name__).exception("review_stats failed")

@@ -7,6 +7,7 @@ class Document(Base):
     __tablename__ = "documents"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     filename = Column(String(500), nullable=False)
     original_name = Column(String(500), nullable=False)
     file_type = Column(String(20), nullable=False)  # "pdf" | "docx" | "doc" | "md" | "txt" | "png" | "jpg" | "jpeg"

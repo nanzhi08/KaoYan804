@@ -82,7 +82,23 @@ def main():
     print("按 Ctrl+C 停止所有服务...")
     print()
 
-    # 持续运行，监控子进程
+    # 持续运行，监控子进程（使用线程读取stdout避免阻塞）
+    import threading
+
+    def _read_stdout(name, proc):
+        try:
+            for line in iter(proc.stdout.readline, ""):
+                if line:
+                    safe_print(f"  [{name}] {line.rstrip()}")
+        except Exception:
+            pass
+
+    threads = []
+    for name, proc in processes:
+        t = threading.Thread(target=_read_stdout, args=(name, proc), daemon=True)
+        t.start()
+        threads.append(t)
+
     try:
         while True:
             for name, proc in processes:
@@ -90,10 +106,7 @@ def main():
                     print(f"[错误] {name}服务意外退出 (code={proc.returncode})")
                     shutdown()
                     sys.exit(1)
-                line = proc.stdout.readline()
-                if line:
-                    safe_print(f"  [{name}] {line.rstrip()}")
-            time.sleep(0.1)
+            time.sleep(0.5)
     except KeyboardInterrupt:
         print("\n正在停止服务...")
         shutdown()

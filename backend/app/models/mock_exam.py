@@ -7,6 +7,7 @@ class MockExam(Base):
     __tablename__ = "mock_exams"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     title = Column(String(200), nullable=False)
     config = Column(JSON, nullable=False)  # {total_score, time_limit, question_ids, ...}
     score = Column(Float, nullable=True)

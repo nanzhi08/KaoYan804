@@ -69,7 +69,6 @@ def get_provider(provider_name: str):
     if provider_name == "claude":
         if not settings.ANTHROPIC_API_KEY:
             raise RuntimeError("AI服务未配置 ANTHROPIC_API_KEY，请先在环境变量或 .env 中设置后再使用。")
-        from ..ai_providers.claude_provider import ClaudeProvider
         return ClaudeProvider()
 
     if not settings.DEEPSEEK_API_KEY:
@@ -138,10 +137,14 @@ async def get_or_create_conversation(
     kp_id: int | None = None,
     question_id: int | None = None,
     first_user_message: str = "",
+    user_id: int | None = None,
 ) -> AIConversation:
     if conversation_id:
         result = await db.execute(
-            select(AIConversation).where(AIConversation.id == conversation_id)
+            select(AIConversation).where(
+                AIConversation.id == conversation_id,
+                AIConversation.user_id == user_id,
+            )
         )
         conv = result.scalar_one_or_none()
         if conv:
@@ -149,6 +152,7 @@ async def get_or_create_conversation(
 
     title = first_user_message.split('\n')[0][:40] if first_user_message else "新对话"
     conv = AIConversation(
+        user_id=user_id,
         provider=provider,
         knowledge_point_id=kp_id,
         question_id=question_id,
@@ -170,6 +174,7 @@ async def get_relevant_examples(
     kp_id: int | None = None,
     user_message: str = "",
     limit: int = 3,
+    user_id: int | None = None,
 ) -> list[AITrainingExample]:
     examples: list[AITrainingExample] = []
 
@@ -185,6 +190,7 @@ async def get_relevant_examples(
                 .where(
                     AITrainingExample.chapter == kp.chapter,
                     AITrainingExample.is_active == True,
+                    AITrainingExample.user_id == user_id,
                 )
                 .order_by(AITrainingExample.usage_count.asc())
                 .limit(limit)
@@ -204,6 +210,7 @@ async def get_relevant_examples(
                 .where(
                     AITrainingExample.keywords.like(f"%{kw}%"),
                     AITrainingExample.is_active == True,
+                    AITrainingExample.user_id == user_id,
                     AITrainingExample.id.notin_(existing_ids) if existing_ids else True,
                 )
                 .order_by(AITrainingExample.usage_count.asc())
@@ -221,6 +228,7 @@ async def get_relevant_examples(
             select(AITrainingExample)
             .where(
                 AITrainingExample.is_active == True,
+                AITrainingExample.user_id == user_id,
                 AITrainingExample.id.notin_(existing_ids) if existing_ids else True,
             )
             .order_by(AITrainingExample.usage_count.asc())
@@ -243,6 +251,7 @@ async def chat_stream(
     conversation_id: int | None = None,
     kp_id: int | None = None,
     question_id: int | None = None,
+    user_id: int | None = None,
 ) -> AsyncIterator[tuple[str, AIConversation]]:
     _ensure_message_ids(messages)
     provider = get_provider(provider_name)
@@ -251,7 +260,7 @@ async def chat_stream(
         if m["role"] == "user":
             first_msg = m["content"]
             break
-    conv = await get_or_create_conversation(db, conversation_id, provider_name, kp_id, question_id, first_msg)
+    conv = await get_or_create_conversation(db, conversation_id, provider_name, kp_id, question_id, first_msg, user_id=user_id)
 
     full_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
@@ -264,6 +273,7 @@ async def chat_stream(
         examples = await get_relevant_examples(
             db, kp_id=kp_id, user_message=user_msg,
             limit=settings.MAX_FEW_SHOT_EXAMPLES,
+            user_id=user_id,
         )
         if examples:
             full_messages.append({

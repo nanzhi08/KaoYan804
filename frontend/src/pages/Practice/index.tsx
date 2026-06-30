@@ -1,9 +1,9 @@
-﻿import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   Card, Select, Button, Space, Radio, Input, Tag, Spin, Empty, Result, Divider,
   Checkbox, Slider, Table, Statistic, Row, Col, Progress, Tabs, Badge, Modal,
-  message,
+  App,
 } from 'antd';
 import {
   PlayCircleOutlined, LeftOutlined, RightOutlined,
@@ -76,6 +76,7 @@ const PracticeConfig: React.FC<{
   onBrowseChapters: () => void;
   stats: PracticeStats | null;
 }> = ({ onStart, onShowHistory, onBrowseChapters, stats }) => {
+  const { message } = App.useApp();
   const location = useLocation();
   const routeState = location.state as PracticeRouteState | null;
   const [qType, setQType] = useState<QuestionTypeFilter>('');
@@ -481,7 +482,7 @@ const QuizView: React.FC<{ onBack: () => void; mode: string }> = ({ onBack, mode
         width={900}
         style={{ top: 20 }}
         footer={null}
-        destroyOnHidden={false}
+        destroyOnClose={false}
       >
         <ChatWindow provider="deepseek" compact initialMessage={aiInitialMsg} />
       </Modal>

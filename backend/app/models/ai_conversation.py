@@ -7,6 +7,7 @@ class AIConversation(Base):
     __tablename__ = "ai_conversations"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     provider = Column(String(30), nullable=False)  # "deepseek"
     model = Column(String(50), default="")
     title = Column(String(200), default="新对话")

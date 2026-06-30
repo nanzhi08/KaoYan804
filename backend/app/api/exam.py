@@ -5,6 +5,8 @@ from datetime import datetime
 import random
 
 from ..database import get_db
+from ..dependencies import get_current_user
+from ..models.user import User
 from ..schemas.common import APIResponse
 from ..models.mock_exam import MockExam
 from ..models.question import Question
@@ -13,271 +15,112 @@ router = APIRouter(prefix="/api/exam", tags=["模拟考试"])
 
 
 @router.post("/generate")
-async def generate_exam(db: AsyncSession = Depends(get_db)):
-    """按804真题比例自动组卷：DS 80分 + C 70分，共150分"""
-    # Count available questions
-    c_total = await db.execute(
-        select(func.count(Question.id)).where(Question.part == "C_programming")
-    )
-    ds_total = await db.execute(
-        select(func.count(Question.id)).where(Question.part == "data_structure")
-    )
-    c_count = c_total.scalar()
-    ds_count = ds_total.scalar()
-
+async def generate_exam(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    c_total = await db.execute(select(func.count(Question.id)).where(Question.part == "C_programming"))
+    ds_total = await db.execute(select(func.count(Question.id)).where(Question.part == "data_structure"))
+    c_count = c_total.scalar(); ds_count = ds_total.scalar()
     if c_count < 10 or ds_count < 10:
-        raise HTTPException(status_code=400, detail="题库不足，至少需要C语言和DS各10道题")
+        raise HTTPException(status_code=400, detail="题库题目不足，无法组卷")
 
-    # Pick questions to match 804 exam pattern:
-    # DS: 10 MC (20pts) + 1 calc (10pts) + 2 analysis (30pts) + 1 programming (20pts) = 80pts
-    # C:  10 MC (20pts) + 3 fill_blank (10pts) + 3 program_reading (10pts) + 3 programming (30pts) = 70pts
+    ds_mc = (await db.execute(select(Question).where(Question.part == "data_structure", Question.type == "single_choice").order_by(func.random()).limit(10))).scalars().all()
+    ds_calc = (await db.execute(select(Question).where(Question.part == "data_structure", Question.type == "calculation").order_by(func.random()).limit(1))).scalars().all()
+    ds_analysis = (await db.execute(select(Question).where(Question.part == "data_structure", Question.type.in_(["analysis", "short_answer"])).order_by(func.random()).limit(2))).scalars().all()
+    ds_prog = (await db.execute(select(Question).where(Question.part == "data_structure", Question.type == "programming").order_by(func.random()).limit(1))).scalars().all()
+    c_mc = (await db.execute(select(Question).where(Question.part == "C_programming", Question.type == "single_choice").order_by(func.random()).limit(10))).scalars().all()
+    c_fill = (await db.execute(select(Question).where(Question.part == "C_programming", Question.type == "fill_blank").order_by(func.random()).limit(3))).scalars().all()
+    c_read = (await db.execute(select(Question).where(Question.part == "C_programming", Question.type == "program_reading").order_by(func.random()).limit(3))).scalars().all()
+    c_prog = (await db.execute(select(Question).where(Question.part == "C_programming", Question.type == "programming").order_by(func.random()).limit(3))).scalars().all()
 
-    ds_mc = await db.execute(
-        select(Question).where(Question.part == "data_structure", Question.type == "single_choice")
-        .order_by(func.random()).limit(10)
-    )
-    ds_calc = await db.execute(
-        select(Question).where(Question.part == "data_structure", Question.type == "calculation")
-        .order_by(func.random()).limit(1)
-    )
-    ds_analysis = await db.execute(
-        select(Question).where(Question.part == "data_structure", Question.type.in_(["analysis", "short_answer"]))
-        .order_by(func.random()).limit(2)
-    )
-    ds_prog = await db.execute(
-        select(Question).where(Question.part == "data_structure", Question.type == "programming")
-        .order_by(func.random()).limit(1)
-    )
-
-    c_mc = await db.execute(
-        select(Question).where(Question.part == "C_programming", Question.type == "single_choice")
-        .order_by(func.random()).limit(10)
-    )
-    c_fill = await db.execute(
-        select(Question).where(Question.part == "C_programming", Question.type == "fill_blank")
-        .order_by(func.random()).limit(3)
-    )
-    c_read = await db.execute(
-        select(Question).where(Question.part == "C_programming", Question.type == "program_reading")
-        .order_by(func.random()).limit(3)
-    )
-    c_prog = await db.execute(
-        select(Question).where(Question.part == "C_programming", Question.type == "programming")
-        .order_by(func.random()).limit(3)
-    )
-
-    ds_mc_items = ds_mc.scalars().all()
-    ds_calc_items = ds_calc.scalars().all()
-    ds_analysis_items = ds_analysis.scalars().all()
-    ds_prog_items = ds_prog.scalars().all()
-    c_mc_items = c_mc.scalars().all()
-    c_fill_items = c_fill.scalars().all()
-    c_read_items = c_read.scalars().all()
-    c_prog_items = c_prog.scalars().all()
-
-    required_sections = [
-        ("数据结构选择题", ds_mc_items, 10),
-        ("数据结构计算题", ds_calc_items, 1),
-        ("数据结构分析题", ds_analysis_items, 2),
-        ("数据结构编程题", ds_prog_items, 1),
-        ("C语言选择题", c_mc_items, 10),
-        ("C语言填空题", c_fill_items, 3),
-        ("C语言程序阅读题", c_read_items, 3),
-        ("C语言编程题", c_prog_items, 3),
+    sections = [
+        ("DS MC", ds_mc, 10), ("DS Calc", ds_calc, 1), ("DS Analysis", ds_analysis, 2), ("DS Prog", ds_prog, 1),
+        ("C MC", c_mc, 10), ("C Fill", c_fill, 3), ("C Reading", c_read, 3), ("C Prog", c_prog, 3),
     ]
-    missing_sections = [
-        f"{label}需要{expected}题，当前{len(items)}题"
-        for label, items, expected in required_sections
-        if len(items) < expected
-    ]
-    if missing_sections:
-        raise HTTPException(status_code=400, detail="题库题型不足：" + "；".join(missing_sections))
+    missing = [f"{l} need {e}, got {len(i)}" for l,i,e in sections if len(i) < e]
+    if missing:
+        raise HTTPException(status_code=400, detail="组卷失败: " + "; ".join(missing))
 
-    question_ids = []
-
-    def add_scored_questions(questions: list[Question], scores: list[int]):
-        for question, score in zip(questions, scores):
-            question_ids.append({"id": question.id, "score": score})
-
-    # DS: 20 + 10 + 30 + 20 = 80
-    add_scored_questions(ds_mc_items, [2] * 10)
-    add_scored_questions(ds_calc_items, [10])
-    add_scored_questions(ds_analysis_items, [15, 15])
-    add_scored_questions(ds_prog_items, [20])
-
-    # C: 20 + 10 + 10 + 30 = 70
-    add_scored_questions(c_mc_items, [2] * 10)
-    add_scored_questions(c_fill_items, [4, 3, 3])
-    add_scored_questions(c_read_items, [4, 3, 3])
-    add_scored_questions(c_prog_items, [10, 10, 10])
-
-    total_configured_score = sum(item["score"] for item in question_ids)
-    if total_configured_score != 150:
-        raise HTTPException(status_code=500, detail=f"试卷分值配置错误：当前合计 {total_configured_score} 分")
+    qids = []
+    def add(qs, scores):
+        for q, s in zip(qs, scores):
+            qids.append({"id": q.id, "score": s})
+    add(ds_mc, [2]*10); add(ds_calc, [10]); add(ds_analysis, [15,15]); add(ds_prog, [20])
+    add(c_mc, [2]*10); add(c_fill, [4,3,3]); add(c_read, [4,3,3]); add(c_prog, [10,10,10])
 
     exam = MockExam(
-        title=f"804模拟考试 - {datetime.now().strftime('%Y-%m-%d %H:%M')}",
-        config={
-            "total_score": 150,
-            "time_limit": 180,  # 3 hours in minutes
-            "question_ids": question_ids,
-        },
-        total_score=150,
-        status="pending",
+        title=f"Mock Exam - {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        config={"question_ids": qids, "time_limit": 180},
+        total_score=150, user_id=current_user.id,
     )
-    db.add(exam)
-    await db.commit()
-    await db.refresh(exam)
+    db.add(exam); await db.commit(); await db.refresh(exam)
 
-    # Fetch all questions with details
-    all_ids = [q["id"] for q in question_ids]
-    qs_result = await db.execute(select(Question).where(Question.id.in_(all_ids)))
-    questions = {q.id: q for q in qs_result.scalars().all()}
-
+    q_result = await db.execute(select(Question).where(Question.id.in_([qi["id"] for qi in qids])))
+    questions = {q.id: q for q in q_result.scalars().all()}
     return APIResponse(data={
-        "exam_id": exam.id,
-        "title": exam.title,
-        "total_score": exam.total_score,
-        "time_limit": 180,
-        "question_count": len(question_ids),
-        "questions": [
-            {
-                "id": qi["id"],
-                "score": qi["score"],
-                "type": questions[qi["id"]].type if qi["id"] in questions else "unknown",
-                "part": questions[qi["id"]].part if qi["id"] in questions else "unknown",
-                "content": questions[qi["id"]].content if qi["id"] in questions else "",
-                "options": questions[qi["id"]].options if qi["id"] in questions else None,
-                "code_snippet": questions[qi["id"]].code_snippet if qi["id"] in questions else None,
-            }
-            for qi in question_ids
-            if qi["id"] in questions
-        ],
+        "id": exam.id, "title": exam.title, "total_score": 150, "time_limit": 180,
+        "questions": [{"id": qi["id"], "score": qi["score"], "type": questions[qi["id"]].type if qi["id"] in questions else "unknown", "content": questions[qi["id"]].content if qi["id"] in questions else "", "options": questions[qi["id"]].options if qi["id"] in questions else None, "code_snippet": questions[qi["id"]].code_snippet if qi["id"] in questions else None} for qi in qids if qi["id"] in questions],
     })
 
 
 @router.get("/{exam_id}")
-async def get_exam(exam_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(MockExam).where(MockExam.id == exam_id))
+async def get_exam(exam_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    result = await db.execute(select(MockExam).where(MockExam.id == exam_id, MockExam.user_id == current_user.id))
     exam = result.scalar_one_or_none()
-    if not exam:
-        raise HTTPException(status_code=404, detail="考试不存在")
-
-    # Fetch associated questions
+    if not exam: raise HTTPException(status_code=404, detail="试卷不存在")
     q_ids = [q["id"] for q in exam.config.get("question_ids", [])]
     qs = {}
     if q_ids:
         q_result = await db.execute(select(Question).where(Question.id.in_(q_ids)))
         qs = {q.id: q for q in q_result.scalars().all()}
-
+    show_answer = exam.status == "completed"
     return APIResponse(data={
-        "id": exam.id,
-        "title": exam.title,
-        "config": exam.config,
-        "score": exam.score,
-        "total_score": exam.total_score,
-        "time_taken": exam.time_taken,
-        "answers": exam.answers,
-        "status": exam.status,
+        "id": exam.id, "title": exam.title, "config": exam.config,
+        "score": exam.score, "total_score": exam.total_score,
+        "time_taken": exam.time_taken, "answers": exam.answers, "status": exam.status,
         "started_at": exam.started_at.isoformat() if exam.started_at else None,
         "completed_at": exam.completed_at.isoformat() if exam.completed_at else None,
         "created_at": exam.created_at.isoformat() if exam.created_at else None,
-        "questions": [
-            {
-                "id": qi["id"],
-                "score": qi["score"],
-                "type": qs[qi["id"]].type if qi["id"] in qs else "unknown",
-                "content": qs[qi["id"]].content if qi["id"] in qs else "",
-                "answer": qs[qi["id"]].answer if qi["id"] in qs and exam.status == "completed" else None,
-                "explanation": qs[qi["id"]].explanation if qi["id"] in qs and exam.status == "completed" else None,
-            }
-            for qi in exam.config.get("question_ids", [])
-            if qi["id"] in qs
-        ],
+        "questions": [{"id": qi["id"], "score": qi["score"], "type": qs[qi["id"]].type if qi["id"] in qs else "unknown", "content": qs[qi["id"]].content if qi["id"] in qs else "", "answer": qs[qi["id"]].answer if qi["id"] in qs and show_answer else None, "explanation": qs[qi["id"]].explanation if qi["id"] in qs and show_answer else None} for qi in exam.config.get("question_ids", []) if qi["id"] in qs],
     })
 
 
 @router.post("/{exam_id}/start")
-async def start_exam(exam_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(MockExam).where(MockExam.id == exam_id))
+async def start_exam(exam_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    result = await db.execute(select(MockExam).where(MockExam.id == exam_id, MockExam.user_id == current_user.id))
     exam = result.scalar_one_or_none()
-    if not exam:
-        raise HTTPException(status_code=404, detail="考试不存在")
-    if exam.status != "pending":
-        raise HTTPException(status_code=400, detail="考试已开始或已结束")
-
-    exam.status = "in_progress"
-    exam.started_at = datetime.now()
-    await db.commit()
+    if not exam: raise HTTPException(status_code=404, detail="试卷不存在")
+    if exam.status != "pending": raise HTTPException(status_code=400, detail="考试已开始或已完成")
+    exam.status = "in_progress"; exam.started_at = datetime.now(); await db.commit()
     return APIResponse(data={"status": "in_progress"})
 
 
 @router.post("/{exam_id}/submit")
-async def submit_exam(exam_id: int, answers: dict, db: AsyncSession = Depends(get_db)):
-    """提交考试答案并自动评分
-    answers: {"question_id": "user_answer", ...}
-    """
-    result = await db.execute(select(MockExam).where(MockExam.id == exam_id))
+async def submit_exam(exam_id: int, answers: dict, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    result = await db.execute(select(MockExam).where(MockExam.id == exam_id, MockExam.user_id == current_user.id))
     exam = result.scalar_one_or_none()
-    if not exam:
-        raise HTTPException(status_code=404, detail="考试不存在")
-
-    # Fetch questions
+    if not exam: raise HTTPException(status_code=404, detail="试卷不存在")
     q_ids = [q["id"] for q in exam.config.get("question_ids", [])]
     q_result = await db.execute(select(Question).where(Question.id.in_(q_ids)))
     questions = {q.id: q for q in q_result.scalars().all()}
-
-    total = 0
-    scored_answers = []
+    total = 0; scored = []
     for qi in exam.config.get("question_ids", []):
         q = questions.get(qi["id"])
-        user_ans = answers.get(str(qi["id"]), "")
+        ua = answers.get(str(qi["id"]), "")
         if q:
-            correct = user_ans.strip().upper() == q.answer.strip().upper()
-            earned = qi["score"] if correct else 0
-            total += earned
-            scored_answers.append({
-                "question_id": qi["id"],
-                "user_answer": user_ans,
-                "correct_answer": q.answer,
-                "is_correct": correct,
-                "score": earned,
-                "max_score": qi["score"],
-            })
-
+            correct = ua.strip().upper() == q.answer.strip().upper()
+            earned = qi["score"] if correct else 0; total += earned
+            scored.append({"question_id": qi["id"], "user_answer": ua, "correct_answer": q.answer, "is_correct": correct, "score": earned, "max_score": qi["score"]})
     now = datetime.now()
-    exam.score = total
-    exam.answers = scored_answers
-    exam.status = "completed"
-    exam.completed_at = now
-    if exam.started_at:
-        exam.time_taken = int((now - exam.started_at).total_seconds())
+    exam.score = total; exam.answers = scored; exam.status = "completed"; exam.completed_at = now
+    if exam.started_at: exam.time_taken = int((now - exam.started_at).total_seconds())
     await db.commit()
-
-    return APIResponse(data={
-        "score": total,
-        "total_score": exam.total_score,
-        "accuracy": round(total / exam.total_score * 100, 1) if exam.total_score > 0 else 0,
-        "answers": scored_answers,
-        "time_taken": exam.time_taken,
-    })
+    return APIResponse(data={"score": total, "total_score": exam.total_score, "accuracy": round(total / exam.total_score * 100, 1) if exam.total_score > 0 else 0, "answers": scored, "time_taken": exam.time_taken})
 
 
 @router.get("")
-async def list_exams(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(
-        select(MockExam).order_by(MockExam.created_at.desc()).limit(20)
-    )
+async def list_exams(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    result = await db.execute(select(MockExam).where(MockExam.user_id == current_user.id).order_by(MockExam.created_at.desc()).limit(20))
     exams = result.scalars().all()
-    return APIResponse(data=[
-        {
-            "id": e.id,
-            "title": e.title,
-            "score": e.score,
-            "total_score": e.total_score,
-            "status": e.status,
-            "time_taken": e.time_taken,
-            "created_at": e.created_at.isoformat() if e.created_at else None,
-        }
-        for e in exams
-    ])
+    return APIResponse(data=[{"id": e.id, "title": e.title, "score": e.score, "total_score": e.total_score, "status": e.status, "time_taken": e.time_taken, "created_at": e.created_at.isoformat() if e.created_at else None} for e in exams])

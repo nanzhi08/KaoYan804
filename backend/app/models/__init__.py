@@ -12,5 +12,8 @@ __all__ = [
     "KnowledgePoint", "Question", "QuestionKnowledgePoint",
     "PracticeRecord", "KnowledgeMastery", "AIConversation",
     "AIFeedback", "AITrainingExample",
-    "Document", "MockExam",
+    "Document", "MockExam", "User", "InviteCode",
 ]
+
+from .user import User
+from .invite_code import InviteCode

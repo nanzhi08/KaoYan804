@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Button, Result, Space, Tag, Descriptions, Radio, Divider, Input } from 'antd';
+import { Card, Button, Result, Space, Tag, Descriptions, Radio, Checkbox, Divider, Input } from 'antd';
 import { FormOutlined, CheckOutlined } from '@ant-design/icons';
 import api from '../../services/api';
 
@@ -11,10 +11,11 @@ interface ExamQuestion {
   content: string;
   options: Record<string, string> | null;
   code_snippet: string | null;
+  answer: string;
 }
 
 interface ExamData {
-  exam_id: number;
+  id: number;
   title: string;
   total_score: number;
   time_limit: number;
@@ -27,6 +28,7 @@ const MockExam: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [showAnswers, setShowAnswers] = useState(false);
   const [score, setScore] = useState<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -37,6 +39,7 @@ const MockExam: React.FC = () => {
       setExam(res.data);
       setAnswers({});
       setSubmitted(false);
+      setShowAnswers(false);
       setScore(null);
       setCurrentIndex(0);
     } catch { /* handled by interceptor */ }
@@ -47,8 +50,8 @@ const MockExam: React.FC = () => {
     if (!exam) return;
     setLoading(true);
     try {
-      await api.post(`/exam/${exam.exam_id}/start`);
-      const submitRes = await api.post(`/exam/${exam.exam_id}/submit`, answers);
+      await api.post(`/exam/${exam.id}/start`);
+      const submitRes = await api.post(`/exam/${exam.id}/submit`, answers);
       setScore(submitRes.data.score);
       setSubmitted(true);
     } catch { /* handled by interceptor */ }
@@ -72,7 +75,7 @@ const MockExam: React.FC = () => {
     );
   }
 
-  if (submitted) {
+  if (submitted && !showAnswers) {
     return (
       <Card title="考试结果">
         <Result
@@ -81,19 +84,34 @@ const MockExam: React.FC = () => {
           subTitle={`正确率: ${score != null ? ((score / exam.total_score) * 100).toFixed(1) : 0}%`}
           extra={
             <Space>
-              <Button onClick={() => { setExam(null); setSubmitted(false); setScore(null); }}>
+              <Button onClick={() => { setExam(null); setSubmitted(false); setShowAnswers(false); setScore(null); }}>
                 重新生成
               </Button>
-              <Button type="primary" onClick={() => setSubmitted(false)}>
+              <Button type="primary" onClick={() => setShowAnswers(true)}>
                 查看答案
               </Button>
             </Space>
           }
         />
+      </Card>
+    );
+  }
+
+  if (submitted && showAnswers) {
+    return (
+      <Card title="答案详情">
+        <Space style={{ marginBottom: 16 }}>
+          <Button onClick={() => setShowAnswers(false)}>返回结果</Button>
+          <Button onClick={() => { setExam(null); setSubmitted(false); setShowAnswers(false); setScore(null); }}>
+            重新生成
+          </Button>
+        </Space>
         {exam.questions.map((q, i) => (
           <Card key={q.id} size="small" style={{ marginTop: 8 }}
             title={`${i + 1}. [${q.score}分] ${q.content?.substring(0, 80)}...`}>
-            <p>你的答案: <Tag>{answers[q.id] || '未作答'}</Tag></p>
+            <p>你的答案: <Tag color={answers[q.id] === q.answer ? 'green' : 'red'}>{answers[q.id] || '未作答'}</Tag></p>
+            <p>正确答案: <Tag color="green">{q.answer}</Tag></p>
+            {q.options && <p>选项: {Object.entries(q.options).map(([k, v]) => `${k}. ${v}`).join(' | ')}</p>}
           </Card>
         ))}
       </Card>
@@ -109,7 +127,7 @@ const MockExam: React.FC = () => {
         items={[
           { key: '1', label: '试卷', children: exam.title },
           { key: '2', label: '总分', children: `${exam.total_score}分` },
-          { key: '3', label: '进度', children: `${currentIndex + 1}/${exam.question_count}` },
+          { key: '3', label: '进度', children: `${currentIndex + 1}/${exam.questions.length}` },
         ]}
       />
 
@@ -123,7 +141,7 @@ const MockExam: React.FC = () => {
           </pre>
         )}
 
-        {q.options && ['single_choice', 'multi_choice'].includes(q.type) && (
+        {q.options && q.type === 'single_choice' && (
           <Radio.Group
             value={answers[q.id]}
             onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
@@ -137,6 +155,22 @@ const MockExam: React.FC = () => {
               ))}
             </Space>
           </Radio.Group>
+        )}
+
+        {q.options && q.type === 'multi_choice' && (
+          <Checkbox.Group
+            value={answers[q.id] ? answers[q.id].split(',').filter(Boolean) : []}
+            onChange={(vals) => setAnswers({ ...answers, [q.id]: (vals as string[]).sort().join(',') })}
+            style={{ width: '100%' }}
+          >
+            <Space orientation="vertical" style={{ width: '100%' }}>
+              {Object.entries(q.options).map(([key, val]) => (
+                <Checkbox key={key} value={key} style={{ padding: 8, borderRadius: 6, width: '100%' }}>
+                  <strong>{key}.</strong> {val}
+                </Checkbox>
+              ))}
+            </Space>
+          </Checkbox.Group>
         )}
 
         {!q.options && (
@@ -167,7 +201,7 @@ const MockExam: React.FC = () => {
               danger
               onClick={handleSubmit}
               loading={loading}
-              disabled={Object.keys(answers).length < exam.question_count}
+              disabled={Object.keys(answers).length < exam.questions.length}
             >
               <CheckOutlined /> 交卷
             </Button>

@@ -1,4 +1,4 @@
-﻿import React, { Suspense, lazy, useState } from "react";
+﻿import React, { Suspense, lazy, useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Tabs } from "antd";
 import { ScheduleOutlined, BarChartOutlined } from "@ant-design/icons";
@@ -29,6 +29,13 @@ const Review: React.FC = () => {
   const location = useLocation();
   const initialTab = (location.state as { tab?: string } | null)?.tab || "plan";
   const [activeTab, setActiveTab] = useState(initialTab);
+
+  useEffect(() => {
+    const tab = (location.state as { tab?: string } | null)?.tab;
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [location.state]);
 
   return (
     <Tabs

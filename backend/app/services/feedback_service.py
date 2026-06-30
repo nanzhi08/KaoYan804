@@ -42,8 +42,10 @@ def _extract_keywords(text: str, max_keywords: int = 10) -> str:
 async def save_feedback_and_extract_example(
     db: AsyncSession,
     data,
+    user_id: int | None = None,
 ) -> tuple[AIFeedback, AITrainingExample | None]:
     feedback = AIFeedback(
+        user_id=user_id,
         conversation_id=data.conversation_id,
         message_id=data.message_id,
         message_index=data.message_index,
@@ -57,13 +59,16 @@ async def save_feedback_and_extract_example(
     if data.rating != 1:
         return feedback, None
 
-    example = await _extract_example(db, data, feedback)
+    example = await _extract_example(db, data, feedback, user_id=user_id)
     return feedback, example
 
 
-async def _extract_example(db, data, feedback) -> AITrainingExample | None:
+async def _extract_example(db, data, feedback, user_id: int | None = None) -> AITrainingExample | None:
     result = await db.execute(
-        select(AIConversation).where(AIConversation.id == data.conversation_id)
+        select(AIConversation).where(
+            AIConversation.id == data.conversation_id,
+            AIConversation.user_id == user_id,
+        )
     )
     conv = result.scalar_one_or_none()
     if not conv or not conv.messages:
@@ -109,6 +114,7 @@ async def _extract_example(db, data, feedback) -> AITrainingExample | None:
     keywords = _extract_keywords(user_question) + "," + qhash
 
     example = AITrainingExample(
+        user_id=user_id,
         conversation_id=conv.id,
         feedback_id=feedback.id,
         user_question=user_question.strip(),

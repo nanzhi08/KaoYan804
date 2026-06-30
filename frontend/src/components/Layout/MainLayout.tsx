@@ -1,36 +1,39 @@
-﻿import React, { Suspense, lazy, useState, useEffect } from "react";
+import React, { Suspense, lazy, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Layout, Menu, Drawer, Button, Tag, Spin } from "antd";
+import { Layout, Menu, Drawer, Button, Tag, Spin, Space } from "antd";
 import {
   DashboardOutlined,
   ReadOutlined,
-  RobotOutlined,
-  FileTextOutlined,
   FormOutlined,
   MenuOutlined,
   RiseOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
 
 import KeepAlive from "./KeepAlive";
-import { fetchSystemHealth } from "../../services/systemApi";
+import { useAuthStore } from "../../stores/useAuthStore";
 
 const { Sider, Content, Header } = Layout;
 
 const Dashboard = lazy(() => import("../../pages/Dashboard"));
 const Study = lazy(() => import("../../pages/Study"));
 const Review = lazy(() => import("../../pages/Review"));
-const AITutor = lazy(() => import("../../pages/AITutor"));
 const MockExam = lazy(() => import("../../pages/MockExam"));
-const Documents = lazy(() => import("../../pages/Documents"));
+const AdminPage = lazy(() => import("../../pages/Admin"));
 
-const menuItems = [
-  { key: "/", icon: <DashboardOutlined />, label: "学习概览" },
-  { key: "/study", icon: <ReadOutlined />, label: "学习练习" },
-  { key: "/review", icon: <RiseOutlined />, label: "复习巩固" },
-  { key: "/ai-tutor", icon: <RobotOutlined />, label: "AI辅导" },
-  { key: "/mock-exam", icon: <FormOutlined />, label: "模拟考试" },
-  { key: "/documents", icon: <FileTextOutlined />, label: "文档资料" },
-];
+const useMenuItems = () => {
+  const isAdmin = useAuthStore((s) => s.isAdmin);
+  const items = [
+    { key: "/", icon: <DashboardOutlined />, label: "首页" },
+    { key: "/study", icon: <ReadOutlined />, label: "学习" },
+    { key: "/review", icon: <RiseOutlined />, label: "复习" },
+    { key: "/mock-exam", icon: <FormOutlined />, label: "模拟考试" },
+  ];
+  if (isAdmin) {
+    items.push({ key: "/admin", icon: <SettingOutlined />, label: "管理" });
+  }
+  return items;
+};
 
 interface PageConfig {
   path: string;
@@ -41,9 +44,8 @@ const pages: PageConfig[] = [
   { path: "/", Component: Dashboard },
   { path: "/study", Component: Study },
   { path: "/review", Component: Review },
-  { path: "/ai-tutor", Component: AITutor },
   { path: "/mock-exam", Component: MockExam },
-  { path: "/documents", Component: Documents },
+  { path: "/admin", Component: AdminPage },
 ];
 
 const SIDEBAR_WIDTH = 200;
@@ -54,7 +56,7 @@ const PageLoading: React.FC = () => (
   </div>
 );
 
-function getMenuSelectedKey(pathname: string): string {
+function getMenuSelectedKey(pathname: string, menuItems: { key: string }[]): string {
   if (pathname === "/") return "/";
   const firstSegment = "/" + pathname.split("/")[1];
   const validPaths = menuItems.map((m) => m.key);
@@ -64,6 +66,7 @@ function getMenuSelectedKey(pathname: string): string {
 const SidebarMenu: React.FC<{ onItemClick?: () => void }> = ({ onItemClick }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const menuItems = useMenuItems();
 
   const handleClick = (key: string) => {
     navigate(key);
@@ -74,7 +77,7 @@ const SidebarMenu: React.FC<{ onItemClick?: () => void }> = ({ onItemClick }) =>
     <Menu
       theme="dark"
       mode="inline"
-      selectedKeys={[getMenuSelectedKey(location.pathname)]}
+      selectedKeys={[getMenuSelectedKey(location.pathname, menuItems)]}
       items={menuItems}
       onClick={({ key }) => handleClick(key)}
       style={{
@@ -86,11 +89,34 @@ const SidebarMenu: React.FC<{ onItemClick?: () => void }> = ({ onItemClick }) =>
   );
 };
 
+const HeaderUser: React.FC = () => {
+  const { user, isAdmin, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
+
+  if (!user) return null;
+
+  return (
+    <Space size={8}>
+      <Tag color={isAdmin ? "red" : "blue"}>{user.username}</Tag>
+      {isAdmin && <Tag color="gold">管理员</Tag>}
+      <Button type="text" size="small" onClick={handleLogout} style={{ color: "#64748B" }}>
+        退出登录
+      </Button>
+    </Space>
+  );
+};
+
 const MainLayout: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [userLabel, setUserLabel] = useState("默认学习者");
+  const isAdmin = useAuthStore((s) => s.isAdmin);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth <= 768);
@@ -98,11 +124,13 @@ const MainLayout: React.FC = () => {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  const filteredPages = pages.filter(p => p.path !== "/admin" || isAdmin);
+
   useEffect(() => {
-    fetchSystemHealth()
-      .then((health) => setUserLabel(health.user_label || "默认学习者"))
-      .catch(() => {});
-  }, []);
+    if (location.pathname.startsWith("/admin") && !isAdmin) {
+      navigate("/", { replace: true });
+    }
+  }, [location.pathname, isAdmin, navigate]);
 
   function isPageActive(path: string): boolean {
     if (path === "/") return location.pathname === "/";
@@ -141,7 +169,7 @@ const MainLayout: React.FC = () => {
             background: "linear-gradient(180deg, rgba(99,102,241,0.08) 0%, transparent 100%)",
             borderBottom: "1px solid rgba(255,255,255,0.06)",
           }}>
-            <span style={{ fontSize: 20 }}>📚</span> 考研804知识库
+            <span style={{ fontSize: 20 }}>&#x1F4DA;</span> 考研804知识库
           </div>
           <SidebarMenu />
         </Sider>
@@ -159,7 +187,7 @@ const MainLayout: React.FC = () => {
             header: { background: "#0F172A", borderBottom: "1px solid rgba(255,255,255,0.06)" },
           }}
           title={<span style={{ color: "#E2E8F0", fontFamily: "'Noto Sans SC', sans-serif", fontSize: 16, fontWeight: 600 }}>考研804知识库</span>}
-          closeIcon={<span style={{ color: "#fff" }}>✕</span>}
+          closeIcon={<span style={{ color: "#fff" }}>&#x2715;</span>}
         >
           <SidebarMenu onItemClick={() => setMobileDrawerOpen(false)} />
         </Drawer>
@@ -194,9 +222,9 @@ const MainLayout: React.FC = () => {
             />
           )}
           <span style={{ flex: 1 }}>
-            {isMobile ? "804知识库" : "上海第二工业大学 · 804 数据结构与高级程序设计"}
+            {isMobile ? "804知识库" : "804 数据结构与高级程序设计"}
           </span>
-          {!isMobile && <Tag color="blue">单用户 · {userLabel}</Tag>}
+          {!isMobile && <HeaderUser />}
         </Header>
 
         <Content style={{
@@ -204,7 +232,7 @@ const MainLayout: React.FC = () => {
           minHeight: 280,
           position: "relative",
         }}>
-          {pages.map(({ path, Component }) => (
+          {filteredPages.map(({ path, Component }) => (
             <KeepAlive
               key={path}
               active={isPageActive(path)}

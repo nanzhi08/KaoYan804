@@ -157,3 +157,44 @@ export interface Document {
   content_text?: string;
   uploaded_at: string;
 }
+
+
+export interface User {
+  id: number;
+  username: string;
+  role: 'user' | 'admin';
+  created_at: string | null;
+}
+
+export interface UserWithStats {
+  id: number;
+  username: string;
+  role: string;
+  practice_count: number;
+  accuracy: number;
+  created_at: string | null;
+}
+
+export interface InviteCode {
+  id: number;
+  code: string;
+  is_used: boolean;
+  used_by: number | null;
+  created_at: string | null;
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  username: string;
+  password: string;
+  invite_code: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  user: User;
+}

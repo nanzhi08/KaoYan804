@@ -1,7 +1,7 @@
 {
   "name": "考研804知识库",
   "short_name": "804知识库",
-  "description": "上海第二工业大学 804《数据结构与高级程序设计》考研备考系统",
+  "description": "804《数据结构与高级程序设计》考研备考系统",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

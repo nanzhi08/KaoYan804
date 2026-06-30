@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+﻿import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
@@ -26,7 +26,7 @@ export default defineConfig({
   ],
   build: {
     emptyOutDir: true,
-    rolldownOptions: {
+    rollupOptions: {
       output: {
         codeSplitting: {
           groups: [
@@ -48,6 +48,13 @@ export default defineConfig({
   server: {
     port: 5173,
     host: '0.0.0.0',  // allow LAN access from mobile
+    hmr: {
+      host: 'localhost',
+      port: 5173,
+    },
+    watch: {
+      ignored: ['**/data/**', '**/backend/**', '**/node_modules/**', '**/.git/**'],
+    },
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:8000',

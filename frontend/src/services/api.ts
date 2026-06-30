@@ -1,5 +1,8 @@
-import axios from 'axios';
-import { message as antdMessage } from 'antd';
+﻿import axios from 'axios';
+
+type MessageApi = {
+  error: (config: { content: string; key: string; duration: number }) => void;
+};
 
 const ERROR_TOAST_COOLDOWN_MS = 3000;
 const recentErrorToasts = new Map<string, number>();
@@ -8,6 +11,21 @@ const api = axios.create({
   baseURL: '/api',
   timeout: 60000,
 });
+
+let _messageApi: MessageApi | null = null;
+
+// --- Auth request interceptor ---
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export function setMessageApi(api: MessageApi) {
+  _messageApi = api;
+}
 
 function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
@@ -18,7 +36,7 @@ function getErrorMessage(error: unknown): string {
 
   return error instanceof Error && error.message
     ? error.message
-    : '网络请求失败，请检查网络连接';
+    : '未知错误，请联系管理员';
 }
 
 function getErrorKey(error: unknown, msg: string): string {
@@ -48,9 +66,28 @@ function shouldShowErrorToast(key: string): boolean {
   return true;
 }
 
+// --- Unified response interceptor ---
 api.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    // Check for business-logic 401
+    if (response.data?.code === 401) {
+      localStorage.removeItem("token");
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+      return Promise.reject(new Error("Unauthorized"));
+    }
+    return response.data;
+  },
   (error) => {
+    // Handle HTTP 401
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+    }
+
     const msg = getErrorMessage(error);
     const errorKey = getErrorKey(error, msg);
 
@@ -58,8 +95,8 @@ api.interceptors.response.use(
       console.error('Unexpected API error:', error);
     }
 
-    if (shouldShowErrorToast(errorKey)) {
-      antdMessage.error({ content: msg, key: errorKey, duration: 3 });
+    if (shouldShowErrorToast(errorKey) && _messageApi) {
+      _messageApi.error({ content: msg, key: errorKey, duration: 3 });
     }
 
     return Promise.reject(error);

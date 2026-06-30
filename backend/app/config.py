@@ -38,5 +38,14 @@ class Settings(BaseSettings):
     ENABLE_FEW_SHOT: bool = True
     MAX_FEW_SHOT_EXAMPLES: int = 3
 
+    # JWT Auth
+    JWT_SECRET: str = "dev-secret-change-in-production"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_MINUTES: int = 1440
+
+    # Initial admin account
+    INIT_ADMIN_USERNAME: str = "admin"
+    INIT_ADMIN_PASSWORD: str = "admin123"
+
 
 settings = Settings()

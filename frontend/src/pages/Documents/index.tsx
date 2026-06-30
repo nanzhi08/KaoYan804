@@ -1,5 +1,5 @@
 ﻿import React, { useCallback, useEffect, useState } from 'react';
-import { Card, Upload, Button, Tag, Popconfirm, Spin, Empty, message } from 'antd';
+import { Card, Upload, Button, Tag, Popconfirm, Spin, Empty, App } from 'antd';
 import { UploadOutlined, FileTextOutlined, DeleteOutlined } from '@ant-design/icons';
 import { fetchDocuments, uploadDocument, deleteDocument } from '../../services/documentApi';
 import type { Document as DocType } from '../../types';
@@ -28,6 +28,7 @@ function normalizeTags(tags: DocType['tags']): string[] {
 }
 
 const Documents: React.FC = () => {
+  const { message } = App.useApp();
   const [docs, setDocs] = useState<DocType[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);

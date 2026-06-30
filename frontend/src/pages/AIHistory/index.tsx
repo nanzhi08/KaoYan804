@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Spin, Empty, Tag, Collapse, Typography, Button, Popconfirm, message } from 'antd';
+import { Card, Spin, Empty, Tag, Collapse, Typography, Button, Popconfirm, App } from 'antd';
 import { HistoryOutlined, RobotOutlined, UserOutlined, ClockCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import ReactMarkdown from 'react-markdown';
 import api from '../../services/api';
@@ -21,6 +21,7 @@ interface ConversationDetail {
 }
 
 const AIHistory: React.FC = () => {
+  const { message } = App.useApp();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState<number | null>(null);

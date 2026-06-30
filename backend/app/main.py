@@ -36,6 +36,26 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"[Seed] Skipping auto-seed: {e}")
 
+    # Seed default admin account
+    try:
+        from .database import async_session
+        from .models.user import User
+        from .dependencies import hash_password
+        from sqlalchemy import select
+        async with async_session() as session:
+            result = await session.execute(select(User).where(User.username == settings.INIT_ADMIN_USERNAME))
+            if not result.scalar_one_or_none():
+                admin_user = User(
+                    username=settings.INIT_ADMIN_USERNAME,
+                    password_hash=hash_password(settings.INIT_ADMIN_PASSWORD),
+                    role="admin",
+                )
+                session.add(admin_user)
+                await session.commit()
+                print(f"[Seed] Created admin user: {settings.INIT_ADMIN_USERNAME}")
+    except Exception as e:
+        print(f"[Seed] Admin seed skipped: {e}")
+
     yield
 
 
@@ -53,7 +73,7 @@ if settings.ENABLE_CORS:
     )
 
 # --- API routes ---
-from .api import knowledge, questions, practice, ai, review, exam, documents, progress
+from .api import knowledge, questions, practice, ai, review, exam, documents, progress, auth, admin
 
 app.include_router(knowledge.router)
 app.include_router(questions.router)
@@ -63,6 +83,8 @@ app.include_router(review.router)
 app.include_router(exam.router)
 app.include_router(documents.router)
 app.include_router(progress.router)
+app.include_router(auth.router)
+app.include_router(admin.router)
 
 
 @app.get("/api/health")

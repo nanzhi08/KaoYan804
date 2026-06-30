@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
+from ..dependencies import get_current_user
 from ..schemas.common import APIResponse, PaginatedData
 from ..schemas.question import QuestionCreate, PracticeSubmit
 from ..services import question_service
@@ -10,7 +11,7 @@ router = APIRouter(prefix="/api/questions", tags=["题库管理"])
 
 
 @router.get("")
-async def list_questions(
+async def list_questions(current_user = Depends(get_current_user), 
     type: str | None = Query(None),
     part: str | None = Query(None),
     difficulty: int | None = Query(None),
@@ -32,7 +33,7 @@ async def list_questions(
 
 
 @router.get("/random")
-async def random_questions(
+async def random_questions(current_user = Depends(get_current_user), 
     count: int = Query(10, ge=1, le=50),
     type: str | None = Query(None),
     part: str | None = Query(None),
@@ -49,13 +50,13 @@ async def random_questions(
 
 
 @router.get("/chapters")
-async def list_chapters(db: AsyncSession = Depends(get_db)):
+async def list_chapters(current_user = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     chapters = await question_service.get_chapter_summary(db)
     return APIResponse(data=chapters)
 
 
 @router.get("/{q_id}")
-async def get_question(q_id: int, db: AsyncSession = Depends(get_db)):
+async def get_question(q_id: int, current_user = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     q = await question_service.get_question(db, q_id)
     if not q:
         return APIResponse(code=404, message="题目不存在")
@@ -63,13 +64,13 @@ async def get_question(q_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("")
-async def create_question(data: QuestionCreate, db: AsyncSession = Depends(get_db)):
+async def create_question(data: QuestionCreate, current_user = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     q = await question_service.create_question(db, data.model_dump())
     return APIResponse(data=question_service.question_to_dict(q))
 
 
 @router.delete("/{q_id}")
-async def delete_question(q_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_question(q_id: int, current_user = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     from sqlalchemy import delete as sa_delete
     from ..models.question import Question, QuestionKnowledgePoint
 

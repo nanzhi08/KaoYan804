@@ -20,6 +20,28 @@ MIGRATIONS: tuple[Migration, ...] = (
         description="Track applied database migrations",
         statements=(),
     ),
+    Migration(
+        version="20260629_0003_fix_knowledge_mastery_unique",
+        description="Remove unique on knowledge_point_id, add composite unique on (user_id, knowledge_point_id)",
+        statements=(
+            "DROP INDEX IF EXISTS ix_knowledge_mastery_knowledge_point_id",
+            "CREATE UNIQUE INDEX IF NOT EXISTS uq_user_knowledge_point ON knowledge_mastery(user_id, knowledge_point_id)",
+        ),
+    ),
+    Migration(
+        version="20260629_0002_user_isolation",
+        description="Add user_id columns for multi-user isolation",
+        statements=(
+            "ALTER TABLE practice_records ADD COLUMN user_id INTEGER REFERENCES users(id)",
+            "ALTER TABLE knowledge_mastery ADD COLUMN user_id INTEGER REFERENCES users(id)",
+            "ALTER TABLE ai_conversations ADD COLUMN user_id INTEGER REFERENCES users(id)",
+            "ALTER TABLE ai_feedbacks ADD COLUMN user_id INTEGER REFERENCES users(id)",
+            "ALTER TABLE ai_training_examples ADD COLUMN user_id INTEGER REFERENCES users(id)",
+            "ALTER TABLE mock_exams ADD COLUMN user_id INTEGER REFERENCES users(id)",
+            "ALTER TABLE documents ADD COLUMN user_id INTEGER REFERENCES users(id)",
+        ),
+    ),
+
 )
 
 
@@ -50,7 +72,11 @@ async def run_migrations(conn: AsyncConnection) -> list[str]:
             continue
 
         for statement in migration.statements:
-            await conn.execute(text(statement))
+            try:
+                await conn.execute(text(statement))
+            except Exception:
+                # Column may already exist from model definitions
+                pass
 
         await conn.execute(
             text(

@@ -1,9 +1,58 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ConfigProvider, App as AntdApp } from 'antd';
+﻿import React, { useEffect, lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { ConfigProvider, App as AntdApp, Spin } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 
 import MainLayout from './components/Layout/MainLayout';
+import { useAuthStore } from './stores/useAuthStore';
+import { setMessageApi } from './services/api';
+
+const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, loading, init } = useAuthStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    init();
+  }, []);
+
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      navigate("/login", { replace: true });
+    }
+  }, [loading, isAuthenticated, navigate]);
+
+  if (loading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  return isAuthenticated ? <>{children}</> : null;
+};
+
+const LoginPage = lazy(() => import("./pages/Login"));
+const RegisterPage = lazy(() => import("./pages/Register"));
+
+const AppInner: React.FC = () => {
+  const { message } = AntdApp.useApp();
+
+  useEffect(() => {
+    setMessageApi(message);
+    return () => setMessageApi(null as unknown as typeof message);
+  }, [message]);
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Suspense fallback={<div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}><Spin size="large" /></div>}><LoginPage /></Suspense>} />
+        <Route path="/register" element={<Suspense fallback={<div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}><Spin size="large" /></div>}><RegisterPage /></Suspense>} />
+        <Route path="*" element={<AuthGuard><MainLayout /></AuthGuard>} />
+      </Routes>
+    </BrowserRouter>
+  );
+};
 
 const App: React.FC = () => (
   <ConfigProvider locale={zhCN} theme={{
@@ -89,11 +138,7 @@ const App: React.FC = () => (
     },
   }}>
     <AntdApp>
-      <BrowserRouter>
-        <Routes>
-          <Route path="*" element={<MainLayout />} />
-        </Routes>
-      </BrowserRouter>
+      <AppInner />
     </AntdApp>
   </ConfigProvider>
 );

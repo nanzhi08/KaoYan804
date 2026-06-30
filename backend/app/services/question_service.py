@@ -174,18 +174,23 @@ async def _update_mastery_from_practice(
     question: Question,
     is_correct: bool,
     score_ratio: float,
+    user_id: int | None = None,
 ) -> None:
     quality = _quality_from_score(is_correct, score_ratio)
     now = datetime.now()
 
     for link in question.knowledge_points:
         result = await db.execute(
-            select(KnowledgeMastery).where(KnowledgeMastery.knowledge_point_id == link.knowledge_point_id)
+            select(KnowledgeMastery).where(
+                KnowledgeMastery.knowledge_point_id == link.knowledge_point_id,
+                KnowledgeMastery.user_id == user_id,
+            )
         )
         mastery = result.scalar_one_or_none()
 
         if mastery is None:
             mastery = KnowledgeMastery(
+                user_id=user_id,
                 knowledge_point_id=link.knowledge_point_id,
                 mastery_level=0.0,
                 ease_factor=2.5,
@@ -233,7 +238,7 @@ async def _update_mastery_from_practice(
         mastery.next_review_at = now + timedelta(days=mastery.interval_days)
 
 
-async def submit_practice(db: AsyncSession, data: dict) -> dict:
+async def submit_practice(db: AsyncSession, data: dict, user_id: int | None = None) -> dict:
     question = await get_question(db, data["question_id"])
     if not question:
         return None
@@ -244,7 +249,7 @@ async def submit_practice(db: AsyncSession, data: dict) -> dict:
         question.answer,
     )
 
-    record = PracticeRecord(
+    record = PracticeRecord(user_id=user_id, 
         question_id=data["question_id"],
         user_answer=data["user_answer"],
         is_correct=is_correct,
@@ -252,7 +257,7 @@ async def submit_practice(db: AsyncSession, data: dict) -> dict:
         practice_mode=data.get("practice_mode", "random"),
     )
     db.add(record)
-    await _update_mastery_from_practice(db, question, is_correct, score_ratio)
+    await _update_mastery_from_practice(db, question, is_correct, score_ratio, user_id=user_id)
     await db.commit()
 
     return {
@@ -269,12 +274,16 @@ async def get_practice_history(
     page: int = 1,
     page_size: int = 20,
     mode: str | None = None,
+    user_id: int | None = None,
 ) -> tuple[list, int]:
     query = select(PracticeRecord).options(
         selectinload(PracticeRecord.question)
     )
     count_query = select(func.count(PracticeRecord.id))
 
+    if user_id:
+        query = query.where(PracticeRecord.user_id == user_id)
+        count_query = count_query.where(PracticeRecord.user_id == user_id)
     if mode:
         query = query.where(PracticeRecord.practice_mode == mode)
         count_query = count_query.where(PracticeRecord.practice_mode == mode)
@@ -290,11 +299,11 @@ async def get_practice_history(
     return list(records), total
 
 
-async def get_wrong_question_ids(db: AsyncSession, limit: int = 50) -> list[int]:
+async def get_wrong_question_ids(db: AsyncSession, limit: int = 50, user_id: int | None = None) -> list[int]:
     """Get question IDs the user got wrong, most recent first"""
     result = await db.execute(
         select(PracticeRecord.question_id)
-        .where(PracticeRecord.is_correct == False)
+        .where(PracticeRecord.is_correct == False, PracticeRecord.user_id == user_id)
         .order_by(PracticeRecord.created_at.desc())
         .limit(limit)
     )

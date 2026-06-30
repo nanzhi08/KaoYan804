@@ -7,6 +7,7 @@ class AIFeedback(Base):
     __tablename__ = "ai_feedbacks"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     conversation_id = Column(Integer, ForeignKey("ai_conversations.id"), nullable=False, index=True)
     message_id = Column(String(64), nullable=False, index=True)
     message_index = Column(Integer, nullable=False)

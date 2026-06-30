@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect, useCallback } from "react";
-import { Card, Button, Tag, Space, Spin, Result, Progress, Rate, message, Statistic, Row, Col } from "antd";
+import { Card, Button, Tag, Space, Spin, Result, Progress, Rate, App, Statistic, Row, Col } from "antd";
 import {
   ScheduleOutlined,
   BookOutlined,
@@ -50,6 +50,7 @@ const formatReviewDate = (value: string | null) => {
 };
 
 const ReviewPlan: React.FC = () => {
+  const { message } = App.useApp();
   const [items, setItems] = useState<ReviewItem[]>([]);
   const [stats, setStats] = useState<ReviewStats | null>(null);
   const [loading, setLoading] = useState(false);

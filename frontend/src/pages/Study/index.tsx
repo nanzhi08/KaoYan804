@@ -1,4 +1,4 @@
-﻿import React, { Suspense, lazy, useState } from "react";
+﻿import React, { Suspense, lazy, useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Tabs } from "antd";
 import { ApartmentOutlined, EditOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
@@ -19,6 +19,13 @@ const Study: React.FC = () => {
   const location = useLocation();
   const initialTab = (location.state as { tab?: string } | null)?.tab || "knowledge";
   const [activeTab, setActiveTab] = useState(initialTab);
+
+  useEffect(() => {
+    const tab = (location.state as { tab?: string } | null)?.tab;
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [location.state]);
 
   return (
     <Tabs activeKey={activeTab} onChange={setActiveTab} items={TAB_ITEMS} size="large" tabBarStyle={{ marginBottom: 16 }} />

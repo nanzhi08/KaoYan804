@@ -8,6 +8,7 @@ class PracticeRecord(Base):
     __tablename__ = "practice_records"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
     user_answer = Column(String(5000), nullable=False)
     is_correct = Column(Boolean, default=False)

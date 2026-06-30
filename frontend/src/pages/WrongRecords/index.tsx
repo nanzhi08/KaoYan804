@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Alert,
@@ -14,7 +14,7 @@ import {
   Statistic,
   Table,
   Tag,
-  message,
+  App,
 } from 'antd';
 import {
   EyeOutlined,
@@ -35,6 +35,7 @@ import {
 const REFRESH_INTERVAL_MS = 60 * 1000;
 
 const WrongRecords: React.FC = () => {
+  const { message } = App.useApp();
   const navigate = useNavigate();
   const { setQuestions, reset } = usePracticeStore();
   const [loading, setLoading] = useState(true);

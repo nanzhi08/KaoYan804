@@ -76,6 +76,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ knowledgePoint, provider, initi
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const getAuthHeaders = (extra: Record<string, string> = {}) => {
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = { ...extra };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return headers;
+  };
+
   /** Shared SSE streaming logic with throttled UI updates via rAF */
   const streamResponse = useCallback(async (
     fetchPromise: Promise<Response>,
@@ -147,7 +154,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ knowledgePoint, provider, initi
 
     const params = new URLSearchParams({ kp_id: String(kp.id), provider });
     await streamResponse(
-      fetch(`/api/ai/explain?${params}`, { method: 'POST' }),
+      fetch(`/api/ai/explain?${params}`, { method: 'POST', headers: getAuthHeaders() }),
       baseMessages,
     );
   }, [provider, streamResponse]);
@@ -158,7 +165,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ knowledgePoint, provider, initi
     await streamResponse(
       fetch('/api/ai/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           provider,
           message: msg,

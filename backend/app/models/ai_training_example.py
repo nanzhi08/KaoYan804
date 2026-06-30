@@ -7,6 +7,7 @@ class AITrainingExample(Base):
     __tablename__ = "ai_training_examples"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     conversation_id = Column(Integer, ForeignKey("ai_conversations.id"), nullable=True)
     feedback_id = Column(Integer, ForeignKey("ai_feedbacks.id"), nullable=True)
     user_question = Column(Text, nullable=False)
