@@ -118,8 +118,9 @@ python scripts/import_documents.py
 
 ## 后端架构要点
 
-- main.py 在 lifespan 中执行 init_db() → os.makedirs(uploads) → seed_all() 自动创建 admin 账户。
+- main.py 在 lifespan 中执行 init_db() → 打印数据库状态 → os.makedirs(uploads) → seed_all() 自动创建 admin 账户。
 - init_db() 内部：Base.metadata.create_all → run_migrations(conn)（迁移失败只记日志不阻断启动）。
+- seed_all() 三级策略：①有知识点→跳过；②有用户但无知识点→ATTACH 种子库 INSERT OR IGNORE（保护用户数据）；③空库→copy2 初始化。
 - 路由模块（10个）：knowledge、questions、practice、ai、review、exam、documents、progress、auth、admin。
 - config.py 使用 Pydantic v2 model_config = SettingsConfigDict(env_file=".env")，通过 DATA_DIR 生成 SQLite 路径。新增 JWT_SECRET、JWT_ALGORITHM、JWT_EXPIRE_MINUTES、INIT_ADMIN_USERNAME、INIT_ADMIN_PASSWORD。
 - dependencies.py：密码哈希/验证 (pbkdf2_sha256 为主，bcrypt 兼容已有密码)、JWT 签发/解析 (python-jose)、get_current_user、require_admin。
@@ -166,6 +167,7 @@ python scripts/import_documents.py
 | 前端 502 Bad Gateway | 后端未启动或端口被旧进程占用 | start.py 自动清理端口；run.py 检测提示 |
 | 登录失败仅显示"登录失败" | 拦截器丢弃服务端错误消息 | 所有非零业务码 reject 并保留 message |
 | JWT 验证失败 | JWT_SECRET 不匹配 | 确认生产 .env 中的 JWT_SECRET |
+| 用户数据被清空 | seed_all 用 bundled DB 覆盖整个库 | 改为 ATTACH + INSERT OR IGNORE 仅导入种子表 |
 
 ## 开发约定
 
@@ -205,6 +207,8 @@ python scripts/import_documents.py
 - Login/Register 页面错误处理兼容 Error 对象，用户能看到具体失败原因（如"Invalid username or password"）。
 - start.py 启动前自动清理端口 8000/5173 残留进程，消除 502 端口冲突。
 - run.py 启动时检测端口占用，打印 taskkill 清理命令提示。
+- seed_all 不再覆盖已有用户数据的数据库：有用户但无知识点时仅导入种子表，用户数据完整保留。
+- main.py 启动时打印 `[Startup] DB at ...: N users, M knowledge points`，方便诊断 Render 磁盘异常。
 
 ## 重要文档
 
