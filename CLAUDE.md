@@ -23,8 +23,8 @@
 │       ├── stores/           Zustand 状态 (useAppStore, usePracticeStore, useAuthStore)
 │       └── types/            TypeScript 类型定义
 ├── backend/                  FastAPI 后端工程
-│   ├── run.py                开发启动入口 (reload=True)
-│   ├── run_prod.py           Render 生产启动入口
+│   ├── run.py                开发启动入口 (reload=True，端口占用检测)
+│   ├── run_prod.py           Render 生产启动入口 (reload=False)
 │   ├── requirements.txt      后端依赖 (含 anthropic>=0.39, python-jose, passlib, bcrypt)
 │   ├── app/
 │   │   ├── main.py           FastAPI app、CORS、lifespan、路由注册、SPA fallback、Admin 自动创建
@@ -44,7 +44,7 @@
 ├── skills/                   已安装的 skills
 ├── docs/                     项目辅助文档
 ├── render.yaml               Render 部署配置
-└── start.py                  本地一键启动脚本
+└── start.py                  本地一键启动脚本（含端口自动清理）
 `
 
 ## 导航结构
@@ -110,7 +110,8 @@ python scripts/import_documents.py
 - MainLayout 是页面容器，通过 KeepAlive 同时挂载所有页面，用 display: none/block 保留页面状态。
 - 页面采用 React.lazy 懒加载，Vite 自动代码分割。
 - services/api.ts 设置 baseURL: '/api'，开发态由 Vite proxy 转发到 127.0.0.1:8000，生产态由 FastAPI 同源服务。
-- API 响应在 axios interceptor 中统一返回 response.data。
+- API 响应拦截器：code=0/undefined 透传；非零业务码（401/400/409等）统一 reject 并保留服务端错误消息；HTTP 401 清除 token 并跳转登录页。
+- Login/Register 页面错误处理兼容 axios error 和拦截器抛出的 Error 对象，正确展示服务端错误消息。
 - 状态管理使用 Zustand：useAppStore 全局选择状态，usePracticeStore 刷题流程状态。
 - MarkdownCode 组件替代了 react-syntax-highlighter（已从依赖移除）。
 - vite.config.ts 配置了 rolldownOptions.codeSplitting 分包策略（react-vendor, markdown-vendor）。
@@ -121,7 +122,7 @@ python scripts/import_documents.py
 - init_db() 内部：Base.metadata.create_all → run_migrations(conn)（迁移失败只记日志不阻断启动）。
 - 路由模块（10个）：knowledge、questions、practice、ai、review、exam、documents、progress、auth、admin。
 - config.py 使用 Pydantic v2 model_config = SettingsConfigDict(env_file=".env")，通过 DATA_DIR 生成 SQLite 路径。新增 JWT_SECRET、JWT_ALGORITHM、JWT_EXPIRE_MINUTES、INIT_ADMIN_USERNAME、INIT_ADMIN_PASSWORD。
-- dependencies.py：密码哈希/验证 (bcrypt)、JWT 签发/解析 (python-jose)、get_current_user、require_admin。
+- dependencies.py：密码哈希/验证 (pbkdf2_sha256 为主，bcrypt 兼容已有密码)、JWT 签发/解析 (python-jose)、get_current_user、require_admin。
 - 数据库 SQLite async，核心表：
   - knowledge_points / questions / question_knowledge_points
   - practice_records / knowledge_mastery
@@ -153,7 +154,7 @@ python scripts/import_documents.py
 
 - **构建**：pip install -r backend/requirements.txt → cd frontend && npm ci && npm run build
 - **启动**：cd backend && python run_prod.py
-- **环境变量**：PORT=8000，ENABLE_CORS=false，JWT_SECRET（生产务必修改）、DEEPSEEK_API_KEY、ANTHROPIC_API_KEY
+- **环境变量**：PORT=8000，ENABLE_CORS=false，DATA_DIR=/data，JWT_SECRET（生产务必修改）、DEEPSEEK_API_KEY、ANTHROPIC_API_KEY
 - **生产行为**：FastAPI 服务 frontend/dist，非 API 路由 fallback 到 index.html
 
 ### 常见部署问题速查
@@ -162,7 +163,8 @@ python scripts/import_documents.py
 |------|------|------|
 | ModuleNotFoundError: No module named 'anthropic' | ClaudeProvider 顶层导入 | 已改为懒加载（292c900） |
 | Exited with status 1 启动崩溃 | run_migrations 未捕获异常 | 已加 try/except（3ae069f） |
-| 前端 502 Bad Gateway | 后端未启动或崩溃 | 检查 Render Logs 定位根因 |
+| 前端 502 Bad Gateway | 后端未启动或端口被旧进程占用 | start.py 自动清理端口；run.py 检测提示 |
+| 登录失败仅显示"登录失败" | 拦截器丢弃服务端错误消息 | 所有非零业务码 reject 并保留 message |
 | JWT 验证失败 | JWT_SECRET 不匹配 | 确认生产 .env 中的 JWT_SECRET |
 
 ## 开发约定
@@ -199,6 +201,10 @@ python scripts/import_documents.py
 - ClaudeProvider 懒加载，anthropic 已加入 requirements.txt。
 - react-syntax-highlighter 已移除，改用自定义 MarkdownCode 组件。
 - Vite 文件监听已排除 data/、backend/ 目录，防止数据库写入触发热重启。
+- API 拦截器统一处理所有非零业务错误码，保留服务端 message 到前端错误提示。
+- Login/Register 页面错误处理兼容 Error 对象，用户能看到具体失败原因（如"Invalid username or password"）。
+- start.py 启动前自动清理端口 8000/5173 残留进程，消除 502 端口冲突。
+- run.py 启动时检测端口占用，打印 taskkill 清理命令提示。
 
 ## 重要文档
 
