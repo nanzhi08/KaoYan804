@@ -28,6 +28,17 @@ async def lifespan(app: FastAPI):
     await init_db()
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 
+    # Log database state for diagnostics
+    try:
+        from .database import async_session
+        from sqlalchemy import text
+        async with async_session() as db:
+            ucount = (await db.execute(text("SELECT COUNT(*) FROM users"))).scalar()
+            kpcount = (await db.execute(text("SELECT COUNT(*) FROM knowledge_points"))).scalar()
+            print(f"[Startup] DB at {settings.DATABASE_URL}: {ucount} users, {kpcount} knowledge points")
+    except Exception:
+        pass
+
     # Auto-seed on first startup (safe to call - skips if data exists)
     try:
         seed_all = _load_seed_all()
